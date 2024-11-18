@@ -1,16 +1,25 @@
-# event_horizon
+# Event-horizon
+Мобильное приложение для создания, планирования и управлениями мероприятиями различных форматов от небольших встреч до крупных праздников.
 
-A new Flutter project.
+Связь: https://t.me/DiaboliFelis
 
-## Getting Started
+# Цель
+Приложение, в котором пользователи могут организовать события, приглашать участников, обмениваться информацией и управлять всеми аспектами мероприятия в одном месте.
 
-This project is a starting point for a Flutter application.
+# Задачи
++ Создать дизайн интерфейса
++ Добавить возможность создания/редактирования мероприятий
++ Реализовать функционал регистрации/авторизации
++ Реализовать систему управления участниками
++ Реализовать систему напоминаний о предстоящих мероприятиях
 
-A few resources to get you started if this is your first Flutter project:
+# Стек технологий
++ Flutter
++ Dart
++ Firebase
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# Дополнительно:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
++ Карта приложения: ![Карта Event horizon](https://github.com/user-attachments/assets/f8391715-d471-4e09-a392-798d1a97f5d4)
++ Фигма приложения: https://www.figma.com/design/FBBMN0uCm6N7czuFzSysv1/Event-Horizon?node-id=1-2
+
