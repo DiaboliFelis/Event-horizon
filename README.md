@@ -19,7 +19,5 @@
 + Firebase
 
 # Дополнительно:
-
-+ Карта приложения: ![Карта Event horizon](https://github.com/user-attachments/assets/f8391715-d471-4e09-a392-798d1a97f5d4)
 + Фигма приложения: https://www.figma.com/design/FBBMN0uCm6N7czuFzSysv1/Event-Horizon?node-id=1-2
 
