@@ -1,25 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// Dummy screens (replace with your actual screens)
-class MenuScreen extends StatelessWidget {
-  const MenuScreen({super.key});
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Меню')),
-        body: const Center(child: Text('Экран меню')),
-      );
-}
-
-class GuestListScreen extends StatelessWidget {
-  const GuestListScreen({super.key});
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Список гостей')),
-        body: const Center(child: Text('Экран списка гостей')),
-      );
-}
-
 class CreatingAnEventPage extends StatefulWidget {
   const CreatingAnEventPage({super.key});
 
@@ -116,6 +97,10 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     );
   }
 
+  String? selectedEventType;
+  bool showTextField = false;
+  TextEditingController customEventTypeController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,13 +152,13 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                     _buildRoundedButton(
                         context,
                         'Меню',
-                        () => Navigator.pushNamed(context, '/menu'),
+                        () => Navigator.pushNamed(context, '/food'),
                         const Color(0xFFD9D9D9),
                         const Size(160, 70)),
                     _buildRoundedButton(
                         context,
                         'Список гостей',
-                        () => Navigator.pushNamed(context, '/guestlist'),
+                        () => Navigator.pushNamed(context, '/guest'),
                         const Color(0xFFD9D9D9),
                         const Size(160, 70)),
                   ],
@@ -181,18 +166,81 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
 
                 const SizedBox(height: 32), // Отступ
 
-                Align(
-                  alignment: Alignment
-                      .center, // Центрирование по горизонтали и вертикали
-                  child: Wrap(
-                    children: [
-                      _buildRoundedButton(context, 'Тип мероприятия', () {},
-                          const Color(0xA64F81A3), const Size(300, 30)),
-                    ],
+                DropdownButtonFormField<String>(
+                  value: selectedEventType,
+                  decoration: InputDecoration(
+                    labelText: 'Тип мероприятия',
+                    labelStyle: TextStyle(
+                        color: const Color(0xFF313131)), // Стиль подписи
+                    hintText: 'Выберите тип', // Подсказка
+                    hintStyle:
+                        TextStyle(color: Colors.black), // Стиль подсказки
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(50), // Скругленные углы
+                      borderSide: BorderSide(
+                        color: const Color(0xA64F81A3),
+                      ), // Цвет рамки
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                        // Рамка, когда поле активно
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide(
+                          color: const Color(0xA64F81A3),
+                        )),
+                    focusedBorder: OutlineInputBorder(
+                        // Рамка, когда поле в фокусе
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide(
+                          color: const Color(0xA64F81A3),
+                        )),
+                    filled: true, // Заливка фона
+                    fillColor: const Color(0xA64F81A3), // Цвет заливки
                   ),
+                  items: <String>[
+                    'День рождения',
+                    'Новый год',
+                    'Хеллоуин',
+                    'Другое',
+                  ].map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                            color: const Color(0x993C3C43), fontSize: 16),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedEventType = newValue;
+                      showTextField = newValue ==
+                          'Другое'; // Показывает текстовое поле, если выбрано "Другое"
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Пожалуйста, выберите тип мероприятия';
+                    }
+                    if (value == 'Другое' &&
+                        customEventTypeController.text.isEmpty) {
+                      return 'Пожалуйста, введите тип мероприятия';
+                    }
+                    return null;
+                  },
+                  onSaved: (newValue) {
+                    selectedEventType = newValue;
+                  },
                 ),
+                if (showTextField) // отображает текстовое поле если выбрано "Другое"
+                  TextField(
+                    controller: customEventTypeController,
+                    decoration: const InputDecoration(
+                        labelText: 'Введите тип мероприятия'),
+                  ),
 
-                const SizedBox(height: 48), // Отступ
+                const SizedBox(height: 37), // Отступ
 
                 // Кнопка "Вишлист"
                 Align(
@@ -200,8 +248,12 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                       .center, // Центрирование по горизонтали и вертикали
                   child: Wrap(
                     children: [
-                      _buildRoundedButton(context, 'Вишлист', () {},
-                          const Color(0xA64F81A3), const Size(250, 75)),
+                      _buildRoundedButton(
+                          context,
+                          'Можете добавить вишлист\n         (список желаний)',
+                          () => Navigator.pushNamed(context, '/wishlist'),
+                          const Color(0xA64F81A3),
+                          const Size(280, 75)),
                     ],
                   ),
                 ),
@@ -215,7 +267,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                     _buildRoundedButton(
                         context,
                         'Назад',
-                        () => Navigator.pop(context),
+                        () => Navigator.pushNamed(context, '/menu'),
                         const Color(0xFFD9D9D9),
                         const Size(150, 70)),
                     _buildRoundedButton(context, 'Сохранить', _submitForm,
