@@ -1,20 +1,10 @@
 //Вишлист
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
+class WishlistPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Вишлист',
-      theme: ThemeData(
-        primarySwatch: Colors.grey,
-      ),
-      home: GuestListScreen(),
-    );
+    return GuestListScreen();
   }
 }
 
@@ -84,13 +74,13 @@ class GuestListScreenState extends State<GuestListScreen> {
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: ListTile(
-                          leading: Icon(Icons.account_circle_outlined),
-                          title: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                              child: Text(wishes[index])
-                          ),
+                      child: ListTile(
+                        leading: Icon(Icons.account_circle_outlined),
+                        title: Card(
+                          child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 10),
+                              child: Text(wishes[index])),
                         ),
                       ),
                     );

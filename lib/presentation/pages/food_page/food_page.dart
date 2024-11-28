@@ -2,20 +2,10 @@
 
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
+class FoodPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Меню',
-      theme: ThemeData(
-        primarySwatch: Colors.grey,
-      ),
-      home: GuestListScreen(),
-    );
+    return GuestListScreen();
   }
 }
 
@@ -45,7 +35,8 @@ class GuestListScreenState extends State<GuestListScreen> {
           title: const Text('Добавить блюдо'),
           content: TextField(
             controller: controller,
-            decoration: const InputDecoration(labelText: 'Введите название блюда'),
+            decoration:
+                const InputDecoration(labelText: 'Введите название блюда'),
           ),
           actions: [
             TextButton(
@@ -85,13 +76,13 @@ class GuestListScreenState extends State<GuestListScreen> {
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: ListTile(
-                          leading: Icon(Icons.account_circle_outlined),
-                          title: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                              child: Text(wishes[index])
-                          ),
+                      child: ListTile(
+                        leading: Icon(Icons.account_circle_outlined),
+                        title: Card(
+                          child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 15.0, horizontal: 10),
+                              child: Text(wishes[index])),
                         ),
                       ),
                     );

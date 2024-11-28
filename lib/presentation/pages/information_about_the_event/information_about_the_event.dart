@@ -50,7 +50,7 @@ class EventInfoScreen extends StatelessWidget {
       int maxLines = 1,
       TextInputType keyboardType = TextInputType.text,
       String? Function(String?)? validator,
-      Color boxColor = const Color(0xA64F81A3),
+      Color boxColor = const Color(0xFF84C6EA),
       Color textColor = Colors.black,
     }) {
       return SizedBox(
@@ -150,7 +150,7 @@ class EventInfoScreen extends StatelessWidget {
                       'Назад',
                       () => Navigator.pop(context),
                       const Color(0xFFD9D9D9),
-                      const Size(160, 70)),
+                      const Size(150, 70)),
                 ],
               ),
             ],

@@ -97,14 +97,18 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     );
   }
 
-  String? selectedEventType;
-  bool showTextField = false;
+  String? selectedEventType; // объявьте переменную вне build
+  bool showTextField = false; // для отображения текстового поля
   TextEditingController customEventTypeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFD0E4F7),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFD0E4F7),
+        title: Text('Создание мероприятия'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Form(
@@ -113,35 +117,35 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildRoundedTitle('Создание мероприятия'),
-                const SizedBox(height: 30),
+                // _buildRoundedTitle('Создание мероприятия'),
+                const SizedBox(height: 20),
                 _buildRoundedTextFormField(
                   controller: _eventNameController,
-                  hintText: '   Название мероприятия',
+                  hintText: 'Название мероприятия',
                 ),
                 const SizedBox(height: 15),
                 _buildRoundedTextFormField(
                   controller: _eventDescriptionController,
-                  hintText: '   Описание мероприятия',
+                  hintText: 'Описание мероприятия',
                 ),
                 const SizedBox(height: 15),
                 _buildRoundedTextFormField(
                   controller: _eventDateController,
-                  hintText: '   ДД.ММ.ГГ',
+                  hintText: 'ДД.ММ.ГГ',
                   keyboardType: TextInputType.datetime,
                   validator: _validateDate,
                 ),
                 const SizedBox(height: 15),
                 _buildRoundedTextFormField(
                   controller: _eventTimeController,
-                  hintText: '   Время мероприятия',
+                  hintText: 'Время мероприятия',
                   keyboardType: TextInputType.datetime,
                   validator: _validateTime,
                 ),
                 const SizedBox(height: 15),
                 _buildRoundedTextFormField(
                   controller: _eventAddressController,
-                  hintText: '   Адрес мероприятия',
+                  hintText: 'Адрес мероприятия',
                 ),
                 const SizedBox(height: 32),
 
@@ -170,8 +174,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                   value: selectedEventType,
                   decoration: InputDecoration(
                     labelText: 'Тип мероприятия',
-                    labelStyle: TextStyle(
-                        color: const Color(0xFF313131)), // Стиль подписи
+                    labelStyle: TextStyle(color: Colors.black), // Стиль подписи
                     hintText: 'Выберите тип', // Подсказка
                     hintStyle:
                         TextStyle(color: Colors.black), // Стиль подсказки
@@ -207,8 +210,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                       value: value,
                       child: Text(
                         value,
-                        style: TextStyle(
-                            color: const Color(0x993C3C43), fontSize: 16),
+                        style: TextStyle(color: Colors.black, fontSize: 16),
                       ),
                     );
                   }).toList(),
@@ -261,19 +263,9 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                 const SizedBox(height: 32), // Отступ
 
                 // Ряд кнопок "Назад" и "Сохранить"
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildRoundedButton(
-                        context,
-                        'Назад',
-                        () => Navigator.pushNamed(context, '/menu'),
-                        const Color(0xFFD9D9D9),
-                        const Size(150, 70)),
-                    _buildRoundedButton(context, 'Сохранить', _submitForm,
-                        const Color(0xFFD9D9D9), const Size(150, 70)),
-                  ],
-                ),
+
+                _buildRoundedButton(context, 'Сохранить', _submitForm,
+                    const Color(0xFFD9D9D9), const Size(320, 70)),
               ],
             ),
           ),
@@ -292,7 +284,6 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     Color textColor = Colors.black,
   }) {
     return SizedBox(
-      width: 250,
       height: 35,
       child: Container(
         decoration: BoxDecoration(
@@ -300,7 +291,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
           borderRadius: BorderRadius.circular(50),
           border: Border.all(color: Colors.grey, width: 1),
         ),
-        padding: const EdgeInsets.all(1),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: TextFormField(
           controller: controller,
           decoration: InputDecoration(

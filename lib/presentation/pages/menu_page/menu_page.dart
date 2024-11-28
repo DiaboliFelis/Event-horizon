@@ -1,22 +1,14 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class Menu extends StatelessWidget {
+  const Menu({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Custom Fonts',
-      theme: ThemeData(fontFamily: 'ComicSans'),
-      home: const Scaffold(
-        backgroundColor: Color(0xFFD8ECFF),
-        appBar: CustomAppBar(),
-        body: CustomBody(),
-      ),
+    return const Scaffold(
+      backgroundColor: Color(0xFFD8ECFF),
+      appBar: CustomAppBar(),
+      body: CustomBody(),
     );
   }
 }
@@ -169,7 +161,8 @@ class CustomBody extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // Действие для создания мероприятия
+                Navigator.pushNamed(context,
+                    '/create_event'); // Действие для создания мероприятия
               },
               child: const Text(
                 'Создать мероприятие',
@@ -192,7 +185,8 @@ class CustomBody extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Действие для отображения "Мои Мероприятия"
+                    Navigator.pushNamed(context,
+                        '/create_event'); // Действие для отображения "Мои Мероприятия"
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
