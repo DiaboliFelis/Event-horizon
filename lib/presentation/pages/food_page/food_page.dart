@@ -35,7 +35,7 @@ class foodListScreenState extends State<foodListScreen> {
           backgroundColor: const Color(0xFFD0E4F7),
           title: SizedBox(
             width: 300,
-            height: 100,
+            height: 60,
             child: Center(
               child:  Card( 
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),

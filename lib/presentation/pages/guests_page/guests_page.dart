@@ -86,7 +86,7 @@ class guestListScreenState extends State<guestListScreen> {
         title: SizedBox
         ( 
           width: 200,
-          height: 100,
+          height: 60,
         child: Card
           (
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
