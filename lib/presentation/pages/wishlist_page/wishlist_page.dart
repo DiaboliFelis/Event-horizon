@@ -4,27 +4,27 @@ import 'package:flutter/material.dart';
 class WishlistPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return WishlistScreen();
+    return wishlistScreen();
   }
 }
 
-class WishlistScreen extends StatefulWidget {
+class wishlistScreen extends StatefulWidget {
   @override
-  WishlistScreenState createState() => WishlistScreenState();
+  wishlistScreenState createState() => wishlistScreenState();
 }
 
-class WishlistScreenState extends State<WishlistScreen> {
-  final List<String> wishes = [];
+class wishlistScreenState extends State<wishlistScreen> {
+  final List<String> guest = [];
 
-  void _addFood(String name) {
-    if (name.isNotEmpty && !wishes.contains(name)) {
+  void _addGuest(String name) {
+    if (name.isNotEmpty && !guest.contains(name)) {
       setState(() {
-        wishes.add(name);
+        guest.add(name);
       });
     }
   }
 
-  void _showAddFoodDialog() {
+  void _showAddguestDialog() {
     final TextEditingController controller = TextEditingController();
 
     showDialog(
@@ -57,8 +57,8 @@ class WishlistScreenState extends State<WishlistScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                String food = controller.text;
-                _addFood(food);
+                String guest = controller.text;
+                _addGuest(guest);
                 Navigator.of(context).pop(); // Закрыть диалог
               },
               child: const Text('Добавить'),
@@ -75,26 +75,31 @@ class WishlistScreenState extends State<WishlistScreen> {
     );
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFD0E4F7),
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: const Color(0xFFD0E4F7),
-        title: Card
-        (
-          margin: const EdgeInsets.all(100),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        title: SizedBox
+        ( 
+          width: 200,
+          height: 100,
+        child: Card
+          (
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           color: const Color(0x993C3C43),
           child: const Padding
-          (
-            padding: EdgeInsets.all(15) ,
+            (
+            padding: EdgeInsets.all(0) ,
             child: Center
             (
             child: Text('Вишлист', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))
             ),
           ),
         ),
+      ),
       ),
       body: Center(
         child: Padding(
@@ -103,7 +108,7 @@ class WishlistScreenState extends State<WishlistScreen> {
             children: [
               Expanded(
                 child: ListView.builder(
-                  itemCount: wishes.length,
+                  itemCount: guest.length,
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -112,10 +117,9 @@ class WishlistScreenState extends State<WishlistScreen> {
                             color: const Color(0xA64F81A3),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                              child: Row( children: [
-                                Text(wishes[index], style: const TextStyle(color: Colors.white),)
-                              ]
-                            ),
+                              child:
+                                Text(guest[index], style: const TextStyle(color: Colors.white),
+                              ),
                           ),
                         ),
                       ),
@@ -129,9 +133,9 @@ class WishlistScreenState extends State<WishlistScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0x993C3C43),
-        onPressed: _showAddFoodDialog,
+        onPressed: _showAddguestDialog,
         tooltip: 'Добавить желание',
-        child: const Icon(Icons.add, color: Colors.white,),
+        child: const Icon(Icons.post_add, color: Colors.white,),
       ),
     );
   }

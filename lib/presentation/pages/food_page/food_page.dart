@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 class FoodPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FoodListScreen();
+    return foodListScreen();
   }
 }
 
-class FoodListScreen extends StatefulWidget {
+class foodListScreen extends StatefulWidget {
   @override
-  FoodListScreenState createState() => FoodListScreenState();
+  foodListScreenState createState() => foodListScreenState();
 }
 
-class FoodListScreenState extends State<FoodListScreen> {
+class foodListScreenState extends State<foodListScreen> {
   final List<String> food = [];
 
   void _addFood(String name) {
@@ -41,14 +41,14 @@ class FoodListScreenState extends State<FoodListScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
               color: const Color(0x993C3C43),
               child: const Padding(
-                padding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                child:  Text('Добавить блюдо', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),),
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
+                child: Text('Добавить блюдо', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),),
               ),
               ),
             ),
           ),
           content: Card( 
-            color: Color(0xA64F81A3),
+            color: const Color(0xA64F81A3),
             child: 
             TextField(
             controller: controller,
@@ -76,26 +76,31 @@ class FoodListScreenState extends State<FoodListScreen> {
     );
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFD0E4F7),
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: const Color(0xFFD0E4F7),
-        title: Card
-        (
-          margin: EdgeInsets.all(100),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-          color: Color(0x993C3C43),
-          child: const Padding
+        title: SizedBox
+        ( 
+          width: 200,
+          height: 100,
+        child: Card
           (
-            padding: EdgeInsets.all(15) ,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+          color: const Color(0x993C3C43),
+          child: const Padding
+            (
+            padding: EdgeInsets.all(0) ,
             child: Center
             (
             child: Text('Меню', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))
             ),
           ),
         ),
+      ),
       ),
       body: Center(
         child: Padding(
@@ -113,10 +118,9 @@ class FoodListScreenState extends State<FoodListScreen> {
                             color: const Color(0xA64F81A3),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                              child: Row( children: [
-                                Text(food[index], style: TextStyle(color: Colors.white),)
-                              ]
-                            ),
+                              child:
+                                Text(food[index], style: const TextStyle(color: Colors.white),
+                              ),
                           ),
                         ),
                       ),
@@ -131,7 +135,7 @@ class FoodListScreenState extends State<FoodListScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0x993C3C43),
         onPressed: _showAddFoodDialog,
-        tooltip: 'Добавить блюдо в меню',
+        tooltip: 'Добавить блюдо',
         child: const Icon(Icons.add, color: Colors.white,),
       ),
     );
