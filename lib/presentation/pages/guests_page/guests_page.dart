@@ -15,12 +15,12 @@ class GuestListScreen extends StatefulWidget {
 }
 
 class GuestListScreenState extends State<GuestListScreen> {
-  final List<String> guests = [];
+  final List<String> wishes = [];
 
   void _addGuest(String name) {
-    if (name.isNotEmpty) {
+    if (name.isNotEmpty && !wishes.contains(name)) {
       setState(() {
-        guests.add(name);
+        wishes.add(name);
       });
     }
   }
@@ -32,16 +32,34 @@ class GuestListScreenState extends State<GuestListScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Добавить гостя'),
-          content: TextField(
+          backgroundColor: const Color(0xFFD0E4F7),
+          title: SizedBox(
+            width: 300,
+            height: 100,
+            child: Center(
+              child:  Card( 
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+              color: const Color(0x993C3C43),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
+                child:  Text('Добавить гостя', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),),
+              ),
+              ),
+            ),
+          ),
+          content: Card( 
+            color: const Color(0xA64F81A3),
+            child: 
+            TextField(
             controller: controller,
             decoration: const InputDecoration(labelText: 'Введите имя гостя'),
+          ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                String guestName = controller.text;
-                _addGuest(guestName);
+                String guest = controller.text;
+                _addGuest(guest);
                 Navigator.of(context).pop(); // Закрыть диалог
               },
               child: const Text('Добавить'),
@@ -61,8 +79,23 @@ class GuestListScreenState extends State<GuestListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFD0E4F7),
       appBar: AppBar(
-        title: const Center(child: Text('Список гостей')),
+        backgroundColor: const Color(0xFFD0E4F7),
+        title: Card
+        (
+          margin: const EdgeInsets.all(100),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+          color:  const Color(0x993C3C43),
+          child: const Padding
+          (
+            padding: EdgeInsets.all(15) ,
+            child: Center
+            (
+            child: Text('Список гостей', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))
+            ),
+          ),
+        ),
       ),
       body: Center(
         child: Padding(
@@ -71,17 +104,20 @@ class GuestListScreenState extends State<GuestListScreen> {
             children: [
               Expanded(
                 child: ListView.builder(
-                  itemCount: guests.length,
+                  itemCount: wishes.length,
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: ListTile(
-                        leading: const Icon(Icons.account_circle_outlined),
-                        title: Card(
-                          child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 15.0, horizontal: 10),
-                              child: Text(guests[index])),
+                        child: ListTile(
+                          title: Card(
+                            color: const Color(0xA64F81A3),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
+                              child: Row( children: [
+                                Text(wishes[index], style: const TextStyle(color: Colors.white),)
+                              ]
+                            ),
+                          ),
                         ),
                       ),
                     );
@@ -93,9 +129,10 @@ class GuestListScreenState extends State<GuestListScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0x993C3C43),
         onPressed: _showAddGuestDialog,
         tooltip: 'Добавить гостя',
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white,),
       ),
     );
   }
