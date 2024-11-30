@@ -187,7 +187,7 @@ class CustomBody extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context,
-                        '/create_event'); // Действие для отображения "Мои Мероприятия"
+                        '/my_event'); // Действие для отображения "Мои Мероприятия"
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -216,7 +216,8 @@ class CustomBody extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Действие для отображения "Архив Мероприятий"
+                    Navigator.pushNamed(context,
+                        '/archive_of_events'); // Действие для отображения "Архив Мероприятий"
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
