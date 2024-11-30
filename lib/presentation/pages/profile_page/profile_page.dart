@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
+class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: MyHomePage(),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFD8ECFF),
       ),
+      body: MyProfile(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFFD8ECFF),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
               width: 250,
@@ -39,7 +36,7 @@ class MyHomePage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 100),
             SizedBox(
               width: 300,
               child: TextField(

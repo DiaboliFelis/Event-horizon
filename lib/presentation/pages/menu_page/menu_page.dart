@@ -73,7 +73,8 @@ class CustomBody extends StatelessWidget {
               // Кнопка перехода на аккаунт
               ElevatedButton(
                 onPressed: () {
-                  // Действие для перехода к виджету аккаунта
+                  Navigator.pushNamed(context,
+                      '/profile'); // Действие для перехода к виджету аккаунта
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
