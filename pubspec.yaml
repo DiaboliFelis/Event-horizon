@@ -80,7 +80,7 @@ flutter:
   fonts:
     - family: Pacifico
       fonts:
-        - asset: lib/utils/fonts/Pacifico-Regular.ttf
+        - asset: assets/Comic_Sans_MS.ttf
         - asset: assets/account_icon.png
   #
   # For details regarding fonts from package dependencies,

@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
       title: 'Event Horizon', // Замените на ваше название приложения
       theme: ThemeData(
         primarySwatch: Colors.blue, // Или ваш preferred цвет
+        fontFamily: 'Pacifico'
       ),
       // Инициализация навигации
       onGenerateRoute: Navigation.generateRoute,
