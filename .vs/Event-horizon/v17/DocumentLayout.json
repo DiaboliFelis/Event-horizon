@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Programming\\EventHorizon\\Event-horizon\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Programming\\EventHorizon\\Event-horizon\\lib\\presentation\\pages\\guests_page\\guests_page.dart||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\presentation\\pages\\guests_page\\guests_page.dart||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "guests_page.dart",
+              "DocumentMoniker": "C:\\Programming\\EventHorizon\\Event-horizon\\lib\\presentation\\pages\\guests_page\\guests_page.dart",
+              "RelativeDocumentMoniker": "lib\\presentation\\pages\\guests_page\\guests_page.dart",
+              "ToolTip": "C:\\Programming\\EventHorizon\\Event-horizon\\lib\\presentation\\pages\\guests_page\\guests_page.dart",
+              "RelativeToolTip": "lib\\presentation\\pages\\guests_page\\guests_page.dart",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-03-07T11:58:55.209Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

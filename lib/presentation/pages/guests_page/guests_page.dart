@@ -42,7 +42,7 @@ class guestListScreenState extends State<guestListScreen> {
               color: const Color(0x993C3C43),
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                child: Text('Добавить блюдо', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),),
+                child: Text('Добавить гостя', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),),
               ),
               ),
             ),
@@ -52,7 +52,7 @@ class guestListScreenState extends State<guestListScreen> {
             child: 
             TextField(
             controller: controller,
-            decoration: const InputDecoration(labelText: 'Введите название блюда'),
+            decoration: const InputDecoration(labelText: 'Добавьте гостя'),
           ),
           ),
           actions: [
