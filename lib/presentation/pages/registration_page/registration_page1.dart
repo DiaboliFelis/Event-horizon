@@ -34,19 +34,19 @@ class MyApp extends StatelessWidget {
                         const SizedBox(
                           height: 20,
                         ),
-                        const Text("Event Horizon",
+                        const Text("Регистрация",
                             style: TextStyle(
                                 fontSize: 31,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700)),
                         const SizedBox(
-                          height: 40,
+                          height: 70,
                         ),
                         TextField(
                           decoration: InputDecoration(
                             contentPadding:
                                 EdgeInsets.symmetric(vertical: 20.0),
-                            hintText: '   Email/логин',
+                            hintText: '   Email',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
@@ -95,6 +95,33 @@ class MyApp extends StatelessWidget {
                           ),
                           keyboardType: TextInputType.visiblePassword,
                         ),
+                        const SizedBox(height: 10),
+                         TextField(
+                          decoration: InputDecoration(
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 20.0),
+                            hintText: '   Повторите пароль',
+                            hintStyle: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF212121),
+                                fontWeight: FontWeight.w700),
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.white),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              // Рамка, когда поле не в фокусе
+                              borderSide: const BorderSide(color: Colors.white),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              // Рамка, когда поле в фокусе
+                              borderSide: const BorderSide(color: Colors.white),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                          ),
+                          keyboardType: TextInputType.visiblePassword,
+                        ),
                         const SizedBox(height: 30),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -106,45 +133,11 @@ class MyApp extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {},
-                          child: const Text('Войти',
+                          child: const Text('Логин',
                               style: TextStyle(
                                   fontSize: 19,
                                   color: Color(0xFF313131),
                                   fontWeight: FontWeight.w700)),
-                        ),
-                        const SizedBox(height: 20),
-                        InkWell(
-                          onTap: () {
-                            // Действие при нажатии
-                          },
-                          child: const Text(
-                            'Забыли пароль?',
-                            style: TextStyle(
-                                color: Colors.white, // Цвет текста
-                                fontWeight: FontWeight.w700,
-                                decoration:
-                                    TextDecoration.underline, // Подчеркивание
-                                fontSize: 20,
-                                decorationColor: Colors.white 
-                                ),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        InkWell(
-                          onTap: () {
-                            // Действие при нажатии
-                          },
-                          child: const Text(
-                            'Регистрация',
-                            style: TextStyle(
-                                color: Colors.white, // Цвет текста
-                                fontWeight: FontWeight.w700,
-                                decoration:
-                                    TextDecoration.underline, // Подчеркивание
-                                fontSize: 20,
-                                decorationColor: Colors.white 
-                                ),
-                          ),
                         ),
                       ],
                     ),
