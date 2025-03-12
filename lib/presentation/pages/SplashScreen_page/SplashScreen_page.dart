@@ -139,7 +139,7 @@ class _SplashscreenState extends State<Splashscreen> {
         backgroundColor: Colors.white, // Цвет кнопки
         onPressed: () {
           Navigator.pushNamed(
-              context, '/menu'); // Переход на след страницу по кнопке
+              context, '/registration'); // Переход на след страницу по кнопке
         },
         child: const Text('Далее'), // Надпись в кнопке
       ),

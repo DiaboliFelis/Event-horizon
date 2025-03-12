@@ -8,6 +8,8 @@ import 'package:event_horizon/presentation/pages/guests_page/guests_page.dart';
 import 'package:event_horizon/presentation/pages/profile_page/profile_page.dart';
 import 'package:event_horizon/presentation/pages/my_events/my events.dart';
 import 'package:event_horizon/presentation/pages/archive_of_events/archive_of_events.dart';
+import 'package:event_horizon/presentation/pages/registration_page/registration_page.dart';
+import 'package:event_horizon/presentation/pages/registration_page/registration_page1.dart';
 
 class Navigation {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -31,6 +33,10 @@ class Navigation {
         return MaterialPageRoute(builder: (context) => MyEventsPage());
       case '/archive_of_events':
         return MaterialPageRoute(builder: (context) => ArchiveOfEventsPage());
+      case '/registration':
+        return MaterialPageRoute(builder: (context) => RegistrationPage());
+      case '/registration1':
+        return MaterialPageRoute(builder: (context) => RegistrationPage1());
       default:
         return MaterialPageRoute(
             builder: (context) => const Scaffold(

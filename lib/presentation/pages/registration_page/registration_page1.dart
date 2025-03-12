@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
-void main() {
-  runApp(const MyApp());
+class RegistrationPage1 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFD8ECFF),
+      ),
+      body: RegistrationScreen1(),
+    );
+  }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class RegistrationScreen1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -16,11 +23,12 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const SizedBox(height: 60),
               Container(
-                height: 450,
+                height: 500,
                 width: 301,
                 decoration: BoxDecoration(
                   color: Color(0xA64F81A3),
@@ -31,21 +39,18 @@ class MyApp extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
                         const Text("Регистрация",
                             style: TextStyle(
                                 fontSize: 31,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700)),
                         const SizedBox(
-                          height: 70,
+                          height: 40,
                         ),
                         TextField(
                           decoration: InputDecoration(
                             contentPadding:
-                                EdgeInsets.symmetric(vertical: 20.0),
+                                EdgeInsets.symmetric(vertical: 10.0),
                             hintText: '   Email',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -72,7 +77,7 @@ class MyApp extends StatelessWidget {
                         TextField(
                           decoration: InputDecoration(
                             contentPadding:
-                                EdgeInsets.symmetric(vertical: 20.0),
+                                EdgeInsets.symmetric(vertical: 10.0),
                             hintText: '   Пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -96,10 +101,10 @@ class MyApp extends StatelessWidget {
                           keyboardType: TextInputType.visiblePassword,
                         ),
                         const SizedBox(height: 10),
-                         TextField(
+                        TextField(
                           decoration: InputDecoration(
                             contentPadding:
-                                EdgeInsets.symmetric(vertical: 20.0),
+                                EdgeInsets.symmetric(vertical: 10.0),
                             hintText: '   Повторите пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -122,22 +127,60 @@ class MyApp extends StatelessWidget {
                           ),
                           keyboardType: TextInputType.visiblePassword,
                         ),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 10),
+                        TextField(
+                          decoration: InputDecoration(
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 10.0),
+                            hintText: '   Логин',
+                            hintStyle: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF212121),
+                                fontWeight: FontWeight.w700),
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.white),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              // Рамка, когда поле не в фокусе
+                              borderSide: const BorderSide(color: Colors.white),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              // Рамка, когда поле в фокусе
+                              borderSide: const BorderSide(color: Colors.white),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                          ),
+                          keyboardType: TextInputType.visiblePassword,
+                        ),
+                        const SizedBox(height: 50),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white, // Цвет фона
+                            backgroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 91, vertical: 15),
+                                horizontal: 16,
+                                vertical: 15), //Уменьшил padding
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           onPressed: () {},
-                          child: const Text('Логин',
+                          child: const SizedBox(
+                            width: 250, // Укажите максимальную ширину
+                            child: AutoSizeText(
+                              'Зарегистрироваться',
                               style: TextStyle(
-                                  fontSize: 19,
-                                  color: Color(0xFF313131),
-                                  fontWeight: FontWeight.w700)),
+                                fontSize: 18,
+                                color: Color(0xFF313131),
+                                fontWeight: FontWeight.w700,
+                              ),
+                              minFontSize: 12,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ),
                       ],
                     ),
