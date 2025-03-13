@@ -22,7 +22,12 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
       return 'Введите дату в формате ДД.ММ.ГГГГ';
     }
     try {
-      DateFormat("dd.MM.yyyy").parse(value);
+      final parsedDate = DateFormat("dd.MM.yyyy").parse(value);
+      if (parsedDate
+          .isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
+        // Сравниваем с "вчера", чтобы разрешить текущую дату
+        return 'Дата должна быть сегодняшней или будущей';
+      }
       return null; // Дата валидна
     } catch (e) {
       return 'Неверный формат даты';
@@ -40,6 +45,39 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     } catch (e) {
       return 'Неверный формат времени';
     }
+  }
+
+  Widget _buildRoundedTextFormField({
+    required TextEditingController controller,
+    required String hintText,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
+    return ConstrainedBox(
+      // Add ConstrainedBox
+      constraints: const BoxConstraints(
+        maxHeight: 75.0, // Adjust maxHeight as needed
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          hintText: hintText,
+          filled: true,
+          fillColor: const Color(0xA64F81A3),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(50.0),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          errorStyle: const TextStyle(
+              fontSize: 12, color: Colors.red), // Adjust error style
+          errorMaxLines: 1, // Limit error lines
+        ),
+        validator: validator,
+      ),
+    );
   }
 
   // Обработчик сохранения данных
@@ -109,200 +147,179 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
         backgroundColor: const Color(0xFFD0E4F7),
         title: Text('Создание мероприятия'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // _buildRoundedTitle('Создание мероприятия'),
-                const SizedBox(height: 20),
-                _buildRoundedTextFormField(
-                  controller: _eventNameController,
-                  hintText: 'Название мероприятия',
-                ),
-                const SizedBox(height: 15),
-                _buildRoundedTextFormField(
-                  controller: _eventDescriptionController,
-                  hintText: 'Описание мероприятия',
-                ),
-                const SizedBox(height: 15),
-                _buildRoundedTextFormField(
-                  controller: _eventDateController,
-                  hintText: 'ДД.ММ.ГГ',
-                  keyboardType: TextInputType.datetime,
-                  validator: _validateDate,
-                ),
-                const SizedBox(height: 15),
-                _buildRoundedTextFormField(
-                  controller: _eventTimeController,
-                  hintText: 'Время мероприятия',
-                  keyboardType: TextInputType.datetime,
-                  validator: _validateTime,
-                ),
-                const SizedBox(height: 15),
-                _buildRoundedTextFormField(
-                  controller: _eventAddressController,
-                  hintText: 'Адрес мероприятия',
-                ),
-                const SizedBox(height: 32),
-
-                // Ряд кнопок "Меню" и "Список гостей"
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        // Use Stack
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildRoundedButton(
-                        context,
-                        'Меню',
-                        () => Navigator.pushNamed(context, '/food'),
-                        const Color(0xFFD9D9D9),
-                        const Size(160, 70)),
-                    _buildRoundedButton(
-                        context,
-                        'Список гостей',
-                        () => Navigator.pushNamed(context, '/guest'),
-                        const Color(0xFFD9D9D9),
-                        const Size(160, 70)),
+                    // _buildRoundedTitle('Создание мероприятия'),
+                    _buildRoundedTextFormField(
+                      controller: _eventNameController,
+                      hintText: 'Название мероприятия',
+                    ),
+                    const SizedBox(height: 10),
+                    _buildRoundedTextFormField(
+                      controller: _eventDescriptionController,
+                      hintText: 'Описание мероприятия',
+                    ),
+                    const SizedBox(height: 10),
+                    _buildRoundedTextFormField(
+                      controller: _eventDateController,
+                      hintText: 'ДД.ММ.ГГ',
+                      keyboardType: TextInputType.datetime,
+                      validator: _validateDate,
+                    ),
+                    const SizedBox(height: 10),
+                    _buildRoundedTextFormField(
+                      controller: _eventTimeController,
+                      hintText: 'Время мероприятия',
+                      keyboardType: TextInputType.datetime,
+                      validator: _validateTime,
+                    ),
+                    const SizedBox(height: 10),
+                    _buildRoundedTextFormField(
+                      controller: _eventAddressController,
+                      hintText: 'Адрес мероприятия',
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Ряд кнопок "Меню" и "Список гостей"
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildRoundedButton(
+                            context,
+                            'Меню',
+                            () => Navigator.pushNamed(context, '/food'),
+                            const Color(0xFFD9D9D9),
+                            const Size(160, 60)),
+                        _buildRoundedButton(
+                            context,
+                            'Список гостей',
+                            () => Navigator.pushNamed(context, '/guest'),
+                            const Color(0xFFD9D9D9),
+                            const Size(160, 60)),
+                      ],
+                    ),
+
+                    const SizedBox(height: 30), // Отступ
+
+                    DropdownButtonFormField<String>(
+                      value: selectedEventType,
+                      decoration: InputDecoration(
+                        labelText: 'Тип мероприятия',
+                        labelStyle:
+                            TextStyle(color: Colors.black), // Стиль подписи
+                        hintText: 'Выберите тип', // Подсказка
+                        hintStyle:
+                            TextStyle(color: Colors.black), // Стиль подсказки
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(50), // Скругленные углы
+                          borderSide: BorderSide(
+                            color: const Color(0xA64F81A3),
+                          ), // Цвет рамки
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                            // Рамка, когда поле активно
+                            borderRadius: BorderRadius.circular(50),
+                            borderSide: BorderSide(
+                              color: const Color(0xA64F81A3),
+                            )),
+                        focusedBorder: OutlineInputBorder(
+                            // Рамка, когда поле в фокусе
+                            borderRadius: BorderRadius.circular(50),
+                            borderSide: BorderSide(
+                              color: const Color(0xA64F81A3),
+                            )),
+                        filled: true, // Заливка фона
+                        fillColor: const Color(0xA64F81A3), // Цвет заливки
+                      ),
+                      items: <String>[
+                        'День рождения',
+                        'Новый год',
+                        'Хеллоуин',
+                        'Другое',
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: TextStyle(color: Colors.black, fontSize: 16),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedEventType = newValue;
+                          showTextField = newValue ==
+                              'Другое'; // Показывает текстовое поле, если выбрано "Другое"
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Пожалуйста, выберите тип мероприятия';
+                        }
+                        if (value == 'Другое' &&
+                            customEventTypeController.text.isEmpty) {
+                          return 'Пожалуйста, введите тип мероприятия';
+                        }
+                        return null;
+                      },
+                      onSaved: (newValue) {
+                        selectedEventType = newValue;
+                      },
+                    ),
+                    if (showTextField) // отображает текстовое поле если выбрано "Другое"
+                      TextField(
+                        controller: customEventTypeController,
+                        decoration: const InputDecoration(
+                            labelText: 'Введите тип мероприятия'),
+                      ), // Отступ
                   ],
                 ),
-
-                const SizedBox(height: 32), // Отступ
-
-                DropdownButtonFormField<String>(
-                  value: selectedEventType,
-                  decoration: InputDecoration(
-                    labelText: 'Тип мероприятия',
-                    labelStyle: TextStyle(color: Colors.black), // Стиль подписи
-                    hintText: 'Выберите тип', // Подсказка
-                    hintStyle:
-                        TextStyle(color: Colors.black), // Стиль подсказки
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(50), // Скругленные углы
-                      borderSide: BorderSide(
-                        color: const Color(0xA64F81A3),
-                      ), // Цвет рамки
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                        // Рамка, когда поле активно
-                        borderRadius: BorderRadius.circular(50),
-                        borderSide: BorderSide(
-                          color: const Color(0xA64F81A3),
-                        )),
-                    focusedBorder: OutlineInputBorder(
-                        // Рамка, когда поле в фокусе
-                        borderRadius: BorderRadius.circular(50),
-                        borderSide: BorderSide(
-                          color: const Color(0xA64F81A3),
-                        )),
-                    filled: true, // Заливка фона
-                    fillColor: const Color(0xA64F81A3), // Цвет заливки
-                  ),
-                  items: <String>[
-                    'День рождения',
-                    'Новый год',
-                    'Хеллоуин',
-                    'Другое',
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedEventType = newValue;
-                      showTextField = newValue ==
-                          'Другое'; // Показывает текстовое поле, если выбрано "Другое"
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Пожалуйста, выберите тип мероприятия';
-                    }
-                    if (value == 'Другое' &&
-                        customEventTypeController.text.isEmpty) {
-                      return 'Пожалуйста, введите тип мероприятия';
-                    }
-                    return null;
-                  },
-                  onSaved: (newValue) {
-                    selectedEventType = newValue;
-                  },
-                ),
-                if (showTextField) // отображает текстовое поле если выбрано "Другое"
-                  TextField(
-                    controller: customEventTypeController,
-                    decoration: const InputDecoration(
-                        labelText: 'Введите тип мероприятия'),
-                  ),
-
-                const SizedBox(height: 37), // Отступ
-
-                // Кнопка "Вишлист"
-                Align(
-                  alignment: Alignment
-                      .center, // Центрирование по горизонтали и вертикали
-                  child: Wrap(
-                    children: [
-                      _buildRoundedButton(
-                          context,
-                          'Можете добавить вишлист\n         (список желаний)',
-                          () => Navigator.pushNamed(context, '/wishlist'),
-                          const Color(0xA64F81A3),
-                          const Size(280, 75)),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32), // Отступ
-
-                // Ряд кнопок "Назад" и "Сохранить"
-
-                _buildRoundedButton(context, 'Сохранить', _submitForm,
-                    const Color(0xFFD9D9D9), const Size(320, 70)),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRoundedTextFormField({
-    required TextEditingController controller,
-    required String hintText,
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-    Color boxColor = const Color(0xA64F81A3),
-    Color textColor = Colors.black,
-  }) {
-    return SizedBox(
-      height: 35,
-      child: Container(
-        decoration: BoxDecoration(
-          color: boxColor,
-          borderRadius: BorderRadius.circular(50),
-          border: Border.all(color: Colors.grey, width: 1),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: hintText,
-            border: InputBorder.none,
+          // Кнопка "Вишлист"
+          Positioned(
+            // Position the "Add Wishlist" button
+            bottom: 100, // Adjust as needed
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.center,
+              child: _buildRoundedButton(
+                context,
+                'Можете добавить вишлист\n         (список желаний)',
+                () => Navigator.pushNamed(context, '/wishlist'),
+                const Color(0xA64F81A3),
+                const Size(280, 75),
+              ),
+            ),
           ),
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          validator: validator,
-          style: TextStyle(color: textColor),
-        ),
+
+          // Ряд кнопок "Назад" и "Сохранить"
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: _buildRoundedButton(
+                context,
+                'Сохранить',
+                _submitForm,
+                const Color(0xFFD9D9D9),
+                const Size(320, 70),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
