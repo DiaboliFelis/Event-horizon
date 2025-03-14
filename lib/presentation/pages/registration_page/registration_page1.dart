@@ -25,6 +25,7 @@ class RegistrationScreen1 extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
+            
             children: [
               const SizedBox(height: 60),
               Container(
@@ -48,9 +49,13 @@ class RegistrationScreen1 extends StatelessWidget {
                           height: 40,
                         ),
                         TextField(
+                           cursorHeight: 25, // Высота курсора
+                          strutStyle: const StrutStyle(
+                          height: 2.5, // Высота строки
+                        ),
                           decoration: InputDecoration(
                             contentPadding:
-                                EdgeInsets.symmetric(vertical: 10.0),
+                               EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
                             hintText: '   Email',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -75,9 +80,13 @@ class RegistrationScreen1 extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         TextField(
+                           cursorHeight: 25, // Высота курсора
+                          strutStyle: const StrutStyle(
+                          height: 2.5, // Высота строки
+                        ),
                           decoration: InputDecoration(
                             contentPadding:
-                                EdgeInsets.symmetric(vertical: 10.0),
+                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
                             hintText: '   Пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -102,9 +111,13 @@ class RegistrationScreen1 extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         TextField(
+                           cursorHeight: 25, // Высота курсора
+                          strutStyle: const StrutStyle(
+                          height: 2.5, // Высота строки
+                        ),
                           decoration: InputDecoration(
                             contentPadding:
-                                EdgeInsets.symmetric(vertical: 10.0),
+                               EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
                             hintText: '   Повторите пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -129,9 +142,13 @@ class RegistrationScreen1 extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         TextField(
+                           cursorHeight: 25, // Высота курсора
+                          strutStyle: const StrutStyle(
+                         height: 2.5, // Высота строки
+                        ),
                           decoration: InputDecoration(
                             contentPadding:
-                                EdgeInsets.symmetric(vertical: 10.0),
+                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
                             hintText: '   Логин',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
