@@ -148,11 +148,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
         backgroundColor: const Color(0xFFD0E4F7),
         title: const Text('Создание мероприятия'),
       ),
-<<<<<<< HEAD
       body: ListView(
-=======
-      body: Stack(
->>>>>>> e78a3c16c202191799eaf4fc9352833d70fd3344
         // Use Stack
         children: [
           Padding(
