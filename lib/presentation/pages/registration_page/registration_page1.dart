@@ -102,11 +102,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                                 fontWeight: FontWeight.w700)),
                         const SizedBox(height: 40),
                         TextField(
-<<<<<<< HEAD
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-=======
                            cursorHeight: 25, // Высота курсора
                           strutStyle: const StrutStyle(
                           height: 2.5, // Высота строки
@@ -114,7 +109,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
->>>>>>> 516deb1511c8698d08ab3910a2b5b51f4d2e8f07
                             hintText: '   Email',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -137,11 +131,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                         ),
                         const SizedBox(height: 10),
                         TextField(
-<<<<<<< HEAD
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-=======
                            cursorHeight: 25, // Высота курсора
                           strutStyle: const StrutStyle(
                           height: 2.5, // Высота строки
@@ -149,7 +138,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                 EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
->>>>>>> 516deb1511c8698d08ab3910a2b5b51f4d2e8f07
                             hintText: '   Пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -173,11 +161,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                         ),
                         const SizedBox(height: 10),
                         TextField(
-<<<<<<< HEAD
-                          controller: _confirmPasswordController,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-=======
                            cursorHeight: 25, // Высота курсора
                           strutStyle: const StrutStyle(
                           height: 2.5, // Высота строки
@@ -185,7 +168,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
->>>>>>> 516deb1511c8698d08ab3910a2b5b51f4d2e8f07
                             hintText: '   Повторите пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
@@ -209,11 +191,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                         ),
                         const SizedBox(height: 10),
                         TextField(
-<<<<<<< HEAD
-                          controller: _loginController,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10.0),
-=======
                            cursorHeight: 25, // Высота курсора
                           strutStyle: const StrutStyle(
                          height: 2.5, // Высота строки
@@ -221,7 +198,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                 EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
->>>>>>> 516deb1511c8698d08ab3910a2b5b51f4d2e8f07
                             hintText: '   Логин',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
