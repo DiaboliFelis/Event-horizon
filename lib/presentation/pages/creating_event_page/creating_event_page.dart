@@ -142,12 +142,13 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFD0E4F7),
       appBar: AppBar(
         backgroundColor: const Color(0xFFD0E4F7),
-        title: Text('Создание мероприятия'),
+        title: const Text('Создание мероприятия'),
       ),
-      body: Stack(
+      body: ListView(
         // Use Stack
         children: [
           Padding(
