@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class RegistrationPage extends StatelessWidget {
   @override
@@ -10,6 +12,46 @@ class RegistrationPage extends StatelessWidget {
 }
 
 class RegistrationScreen extends StatelessWidget {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+  }
+
+  Future<void> SignInWithEmailAndPassword({
+    required String email,
+    required String password,
+    required BuildContext context,
+  }) async {
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      Navigator.pushNamed(context, '/menu');
+    } on FirebaseAuthException catch (e) {
+    String errorMessage = 'Произошла ошибка. Пожалуйста, повоторите позднее.';
+    if (e.code == 'weak-password') {
+      errorMessage = 'Слишком простой пароль.';
+    } else if (e.code == 'email-already-in-use') {
+      errorMessage = 'Аккаунт с такой почтой уже существует.';
+    }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Неожиданная ошибка.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,10 +78,9 @@ class RegistrationScreen extends StatelessWidget {
                               fontSize: 31,
                               color: Colors.white,
                               fontWeight: FontWeight.w700)),
-                      const SizedBox(
-                        height: 40,
-                      ),
+                      const SizedBox(height: 40),
                       TextField(
+                        controller: _emailController,
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.symmetric(vertical: 20.0),
                           hintText: '   Email/логин',
@@ -52,12 +93,10 @@ class RegistrationScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            // Рамка, когда поле не в фокусе
                             borderSide: const BorderSide(color: Colors.white),
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            // Рамка, когда поле в фокусе
                             borderSide: const BorderSide(color: Colors.white),
                             borderRadius: BorderRadius.circular(10.0),
                           ),
@@ -66,6 +105,8 @@ class RegistrationScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       TextField(
+                        controller: _passwordController,
+                        obscureText: true, 
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.symmetric(vertical: 20.0),
                           hintText: '   Пароль',
@@ -78,12 +119,10 @@ class RegistrationScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            // Рамка, когда поле не в фокусе
                             borderSide: const BorderSide(color: Colors.white),
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            // Рамка, когда поле в фокусе
                             borderSide: const BorderSide(color: Colors.white),
                             borderRadius: BorderRadius.circular(10.0),
                           ),
@@ -93,15 +132,30 @@ class RegistrationScreen extends StatelessWidget {
                       const SizedBox(height: 30),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white, // Цвет фона
+                          backgroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 91, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/menu');
+                        onPressed: () async {
+                          final email = _emailController.text.trim();
+                          final password = _passwordController.text.trim();
+
+                          if (email.isEmpty || password.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Пожалуйста, заполните все поля.')),
+                            );
+                            return;
+                          }
+
+                          await SignInWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                            context: context,
+                          );
                         },
                         child: const Text('Войти',
                             style: TextStyle(
@@ -112,15 +166,13 @@ class RegistrationScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       InkWell(
                         onTap: () {
-                          // Действие при нажатии
                         },
                         child: const Text(
                           'Забыли пароль?',
                           style: TextStyle(
-                              color: Colors.white, // Цвет текста
+                              color: Colors.white,
                               fontWeight: FontWeight.w700,
-                              decoration:
-                                  TextDecoration.underline, // Подчеркивание
+                              decoration: TextDecoration.underline,
                               fontSize: 20,
                               decorationColor: Colors.white),
                         ),
@@ -128,16 +180,14 @@ class RegistrationScreen extends StatelessWidget {
                       const SizedBox(height: 40),
                       InkWell(
                         onTap: () {
-                          Navigator.pushNamed(context,
-                              '/registration1'); // Действие при нажатии
+                          Navigator.pushNamed(context, '/registration1');
                         },
                         child: const Text(
                           'Регистрация',
                           style: TextStyle(
-                              color: Colors.white, // Цвет текста
+                              color: Colors.white,
                               fontWeight: FontWeight.w700,
-                              decoration:
-                                  TextDecoration.underline, // Подчеркивание
+                              decoration: TextDecoration.underline,
                               fontSize: 20,
                               decorationColor: Colors.white),
                         ),
