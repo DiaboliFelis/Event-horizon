@@ -102,6 +102,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                                 fontWeight: FontWeight.w700)),
                         const SizedBox(height: 40),
                         TextField(
+                          controller: _emailController,
                            cursorHeight: 25, // Высота курсора
                           strutStyle: const StrutStyle(
                           height: 2.5, // Высота строки
@@ -131,6 +132,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                         ),
                         const SizedBox(height: 10),
                         TextField(
+                          controller: _passwordController,
                            cursorHeight: 25, // Высота курсора
                           strutStyle: const StrutStyle(
                           height: 2.5, // Высота строки
@@ -161,6 +163,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                         ),
                         const SizedBox(height: 10),
                         TextField(
+                          controller: _confirmPasswordController,
                            cursorHeight: 25, // Высота курсора
                           strutStyle: const StrutStyle(
                           height: 2.5, // Высота строки
@@ -191,6 +194,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                         ),
                         const SizedBox(height: 10),
                         TextField(
+                          controller: _loginController,
                            cursorHeight: 25, // Высота курсора
                           strutStyle: const StrutStyle(
                          height: 2.5, // Высота строки

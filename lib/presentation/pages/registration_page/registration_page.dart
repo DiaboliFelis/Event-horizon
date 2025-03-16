@@ -173,7 +173,8 @@ class RegistrationScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       InkWell(
-                        onTap: () {
+                        //TODO
+                        onTap: ()  { 
                         },
                         child: const Text(
                           'Забыли пароль?',
