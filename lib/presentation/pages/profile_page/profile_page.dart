@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -6,9 +7,91 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFD8ECFF),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.more_vert),
+            onPressed: () {
+              _showOptionsDialog(context);
+            },
+          ),
+        ],
       ),
       body: MyProfile(),
     );
+  }
+  // Отображение диалогового окна
+  void _showOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Выберите действие"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.edit),
+                title: Text("Изменить имя"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showChangeNameDialog(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo),
+                title: Text("Изменить фото"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImageFromGallery(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  // Отображение диалога изменения имени
+  void _showChangeNameDialog(BuildContext context) {
+    TextEditingController nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Изменить имя"),
+          content: TextField(
+            controller: nameController,
+            decoration: InputDecoration(hintText: "Введите новое имя"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("Отмена"),
+            ),
+            TextButton(
+              onPressed: () {
+                String newName = nameController.text;
+                if (newName.isNotEmpty) {
+                  // добавить логику сохранения
+                }
+                Navigator.pop(context);
+              },
+              child: Text("Сохранить"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  // Выбор фото из галереи
+  void _pickImageFromGallery(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      // добавить логику сохранения
+    }
   }
 }
 
