@@ -76,7 +76,8 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
         scaffoldBackgroundColor: Color(0xFFD8ECFF),
       ),
       home: Scaffold(
-        body: Center(
+        body: SingleChildScrollView(
+          child:Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -84,7 +85,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
             children: [
               const SizedBox(height: 60),
               Container(
-                height: 500,
+                height: 550,
                 width: 301,
                 decoration: BoxDecoration(
                   color: Color(0xA64F81A3),
@@ -282,6 +283,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
