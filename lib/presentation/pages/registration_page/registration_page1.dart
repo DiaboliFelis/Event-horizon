@@ -111,7 +111,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: '   Email',
+                            hintText: 'Email',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
@@ -141,7 +141,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                 EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: '   Пароль',
+                            hintText: 'Пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
@@ -172,7 +172,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: '   Повторите пароль',
+                            hintText: 'Повторите пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
@@ -203,7 +203,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                 EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: '   Логин',
+                            hintText: 'Логин',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
