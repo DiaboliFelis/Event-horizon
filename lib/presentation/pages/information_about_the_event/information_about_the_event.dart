@@ -1,22 +1,14 @@
 //import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart'; // Для форматирования даты и времени
 
 class EventInfoScreen extends StatelessWidget {
-  final String eventName;
-  final String eventType;
-  final DateTime eventDate;
-  final TimeOfDay eventTime;
-  final String eventAddress;
+  final String documentId; // Получаем documentId через конструктор
 
-  EventInfoScreen({
-    Key? key,
-    required this.eventName,
-    required this.eventType,
-    required this.eventDate,
-    required this.eventTime,
-    required this.eventAddress,
-  }) : super(key: key);
+  EventInfoScreen({Key? key, required this.documentId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +38,7 @@ class EventInfoScreen extends StatelessWidget {
     }
 
     Widget _buildRoundedTextFormField({
-      required String hintText,
+      required String initialValue,
       int maxLines = 1,
       TextInputType keyboardType = TextInputType.text,
       String? Function(String?)? validator,
@@ -63,8 +55,9 @@ class EventInfoScreen extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(3),
           child: TextFormField(
+            initialValue: initialValue,
+            enabled: false,
             decoration: InputDecoration(
-              hintText: hintText,
               border: InputBorder.none,
             ),
             maxLines: maxLines,
@@ -102,59 +95,88 @@ class EventInfoScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFD0E4F7),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          // Для прокрутки, если контент будет больше экрана
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment
-                .stretch, // Растягиваем элементы на всю ширину
-            children: [
-              _buildRoundedTitle(eventName, const Size(351, 60)),
-              SizedBox(height: 250),
-              _buildRoundedTextFormField(hintText: eventType),
-              SizedBox(height: 16),
-              _buildRoundedTextFormField(
-                  hintText: dateFormat.format(eventDate)),
-              SizedBox(height: 16),
-              _buildRoundedTextFormField(
-                hintText: timeFormat.format(
-                    DateTime(2000, 1, 1, eventTime.hour, eventTime.minute)),
+      body: BlocProvider<EventCubit>(
+        create: (context) => EventCubit()..onPageOpened(documentId),
+        child: BlocBuilder<EventCubit, InformationAboutTheEventState>(
+          builder: (context, state) {
+            if (state is InfAboutTheEventLoadInProgress) {
+              return Center(child: CircularProgressIndicator());
+            }
+            final successState = state as InfAboutTheEventLoadSuccess;
+
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                // Для прокрутки, если контент будет больше экрана
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment
+                      .stretch, // Растягиваем элементы на всю ширину
+                  children: [
+                    _buildRoundedTitle(
+                        successState.eventdata.eventName ?? 'Нет названия',
+                        const Size(351, 60)),
+                    SizedBox(height: 250),
+                    _buildRoundedTextFormField(
+                        initialValue:
+                            successState.eventdata.eventType ?? 'Нет типа'),
+                    SizedBox(height: 16),
+                    _buildRoundedTextFormField(
+                      initialValue: successState.eventdata.eventDate != null
+                          // ? dateFormat.format(successState.eventdata.eventDate!)
+                          ? successState.eventdata.eventDate!
+                          : 'Нет даты',
+                    ),
+                    SizedBox(height: 16),
+                    _buildRoundedTextFormField(
+                      initialValue: successState.eventdata.eventTime != null
+                          // ? timeFormat.format(DateTime(
+                          //     2000,
+                          //     1,
+                          //     1,
+                          //     successState.eventdata.eventTime!.hour,
+                          //     successState.eventdata.eventTime!.minute))
+                          ? successState.eventdata.eventTime!
+                          : 'Нет времени',
+                    ),
+                    SizedBox(height: 16),
+                    _buildRoundedTextFormField(
+                        initialValue: successState.eventdata.eventAddress ??
+                            'Нет адреса'),
+                    SizedBox(height: 50),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildRoundedButton(
+                            context,
+                            'Меню',
+                            () => Navigator.pushNamed(context, '/menu'),
+                            const Color(0xFFD9D9D9),
+                            const Size(160, 70)),
+                        _buildRoundedButton(
+                            context,
+                            'Список гостей',
+                            () => Navigator.pushNamed(context, '/guestlist'),
+                            const Color(0xFFD9D9D9),
+                            const Size(160, 70)),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildRoundedButton(
+                            context,
+                            'Назад',
+                            () => Navigator.pop(context),
+                            const Color(0xFFD9D9D9),
+                            const Size(150, 70)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 16),
-              _buildRoundedTextFormField(hintText: eventAddress),
-              SizedBox(height: 50),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildRoundedButton(
-                      context,
-                      'Меню',
-                      () => Navigator.pushNamed(context, '/menu'),
-                      const Color(0xFFD9D9D9),
-                      const Size(160, 70)),
-                  _buildRoundedButton(
-                      context,
-                      'Список гостей',
-                      () => Navigator.pushNamed(context, '/guestlist'),
-                      const Color(0xFFD9D9D9),
-                      const Size(160, 70)),
-                ],
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildRoundedButton(
-                      context,
-                      'Назад',
-                      () => Navigator.pop(context),
-                      const Color(0xFFD9D9D9),
-                      const Size(150, 70)),
-                ],
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

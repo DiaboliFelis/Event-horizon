@@ -10,6 +10,7 @@ import 'package:event_horizon/presentation/pages/my_events/my events.dart';
 import 'package:event_horizon/presentation/pages/archive_of_events/archive_of_events.dart';
 import 'package:event_horizon/presentation/pages/registration_page/registration_page.dart';
 import 'package:event_horizon/presentation/pages/registration_page/registration_page1.dart';
+import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
 
 class Navigation {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -37,6 +38,24 @@ class Navigation {
         return MaterialPageRoute(builder: (context) => RegistrationPage());
       case '/registration1':
         return MaterialPageRoute(builder: (context) => RegistrationPage1());
+      case '/eventInfo': // Обрабатываем маршрут '/eventInfo'
+        // Получаем аргументы из settings.arguments
+        final args =
+            settings.arguments as Map<String, dynamic>?; // Проверяем на null
+        final documentId = args?['documentId']
+            as String?; // Получаем documentId и обрабатываем null
+
+        // Проверяем, что documentId не null
+        if (documentId != null) {
+          return MaterialPageRoute(
+              builder: (context) => EventInfoScreen(documentId: documentId));
+        } else {
+          // Если documentId null, отображаем экран ошибки или возвращаемся назад
+          return MaterialPageRoute(
+              builder: (context) => const Scaffold(
+                  body:
+                      Center(child: Text('Ошибка: Document ID отсутствует'))));
+        }
       default:
         return MaterialPageRoute(
             builder: (context) => const Scaffold(
