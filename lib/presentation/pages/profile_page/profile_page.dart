@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+//import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -19,6 +19,7 @@ class ProfilePage extends StatelessWidget {
       body: MyProfile(),
     );
   }
+
   // Отображение диалогового окна
   void _showOptionsDialog(BuildContext context) {
     showDialog(
@@ -51,6 +52,7 @@ class ProfilePage extends StatelessWidget {
       },
     );
   }
+
   // Отображение диалога изменения имени
   void _showChangeNameDialog(BuildContext context) {
     TextEditingController nameController = TextEditingController();
@@ -85,13 +87,14 @@ class ProfilePage extends StatelessWidget {
       },
     );
   }
+
   // Выбор фото из галереи
   void _pickImageFromGallery(BuildContext context) async {
-    final ImagePicker picker = ImagePicker();
+    /*final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       // добавить логику сохранения
-    }
+    }*/
   }
 }
 
