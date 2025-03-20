@@ -19,6 +19,7 @@ class EventInfoScreen extends StatelessWidget {
     Widget _buildRoundedButton(BuildContext context, String text,
         VoidCallback onPressed, Color buttonColor, Size size) {
       return SizedBox(
+        
         width: size.width,
         height: size.height,
         child: ElevatedButton(
@@ -94,6 +95,10 @@ class EventInfoScreen extends StatelessWidget {
     }
 
     return Scaffold(
+       appBar: AppBar(
+        backgroundColor: const Color(0xFFD0E4F7),
+        title: const Text('Создание мероприятия'),
+      ),
       backgroundColor: const Color(0xFFD0E4F7),
       body: BlocProvider<EventCubit>(
         create: (context) => EventCubit()..onPageOpened(documentId),
@@ -143,35 +148,9 @@ class EventInfoScreen extends StatelessWidget {
                         initialValue: successState.eventdata.eventAddress ??
                             'Нет адреса'),
                     SizedBox(height: 50),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildRoundedButton(
-                            context,
-                            'Меню',
-                            () => Navigator.pushNamed(context, '/menu'),
-                            const Color(0xFFD9D9D9),
-                            const Size(160, 70)),
-                        _buildRoundedButton(
-                            context,
-                            'Список гостей',
-                            () => Navigator.pushNamed(context, '/guestlist'),
-                            const Color(0xFFD9D9D9),
-                            const Size(160, 70)),
-                      ],
-                    ),
+                    
                     SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildRoundedButton(
-                            context,
-                            'Назад',
-                            () => Navigator.pop(context),
-                            const Color(0xFFD9D9D9),
-                            const Size(150, 70)),
-                      ],
-                    ),
+                    
                   ],
                 ),
               ),
