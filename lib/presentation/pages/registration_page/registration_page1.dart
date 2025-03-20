@@ -15,24 +15,26 @@ class RegistrationPage1 extends StatelessWidget {
   }
 }
 
-void CreateUserWithLoginEmailAndPassword({required String email,required String password, required BuildContext context,}) async 
-{
+void CreateUserWithLoginEmailAndPassword({
+  required String email,
+  required String password,
+  required BuildContext context,
+}) async {
   try {
     UserCredential userCredential =
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
-      
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Пользователь зарегестрирован успешно!')),
+      const SnackBar(content: Text('Пользователь зарегистрирован успешно!')),
     );
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
-
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => ProfilePage()));
   } on FirebaseAuthException catch (e) {
-    String errorMessage = 'Произошла ошибка. Пожалуйста, повоторите позднее.';
+    String errorMessage = 'Произошла ошибка. Пожалуйста, повторите позднее.';
     if (e.code == 'weak-password') {
       errorMessage = 'Слишком простой пароль.';
     } else if (e.code == 'email-already-in-use') {
@@ -61,6 +63,21 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
   final _loginController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => ProfilePage()),
+          );
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -77,213 +94,106 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
       ),
       home: Scaffold(
         body: SingleChildScrollView(
-          child:Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            
-            children: [
-              const SizedBox(height: 60),
-              Container(
-                height: 550,
-                width: 301,
-                decoration: BoxDecoration(
-                  color: Color(0xA64F81A3),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        const Text("Регистрация",
-                            style: TextStyle(
-                                fontSize: 31,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 40),
-                        TextField(
-                          controller: _emailController,
-                           cursorHeight: 25, // Высота курсора
-                          strutStyle: const StrutStyle(
-                          height: 2.5, // Высота строки
-                        ),
-                          decoration: InputDecoration(
-                            contentPadding:
-                               EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: 'Email',
-                            hintStyle: const TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF212121),
-                                fontWeight: FontWeight.w700),
-                            border: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: _passwordController,
-                           cursorHeight: 25, // Высота курсора
-                          strutStyle: const StrutStyle(
-                          height: 2.5, // Высота строки
-                        ),
-                          decoration: InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: 'Пароль',
-                            hintStyle: const TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF212121),
-                                fontWeight: FontWeight.w700),
-                            border: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                          ),
-                          obscureText: true,
-                          keyboardType: TextInputType.visiblePassword,
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: _confirmPasswordController,
-                           cursorHeight: 25, // Высота курсора
-                          strutStyle: const StrutStyle(
-                          height: 2.5, // Высота строки
-                        ),
-                          decoration: InputDecoration(
-                            contentPadding:
-                               EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: 'Повторите пароль',
-                            hintStyle: const TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF212121),
-                                fontWeight: FontWeight.w700),
-                            border: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                          ),
-                          obscureText: true,
-                          keyboardType: TextInputType.visiblePassword,
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: _loginController,
-                           cursorHeight: 25, // Высота курсора
-                          strutStyle: const StrutStyle(
-                         height: 2.5, // Высота строки
-                        ),
-                          decoration: InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: 'Логин',
-                            hintStyle: const TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF212121),
-                                fontWeight: FontWeight.w700),
-                            border: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.white),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                          ),
-                          keyboardType: TextInputType.text,
-                        ),
-                        const SizedBox(height: 50),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () {
-                            final email = _emailController.text.trim();
-                            final password = _passwordController.text.trim();
-                            final confirmPassword = _confirmPasswordController.text.trim();
-                            final login = _loginController.text.trim();
-
-                            if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || login.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Пожалуйста, заполните все поля')),
-                              );
-                              return;
-                            }
-
-                            if (password != confirmPassword) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Пароли не совпадает')),
-                              );
-                              return;
-                            }
-
-                            CreateUserWithLoginEmailAndPassword(
-                              email: email,
-                              password: password,
-                              context: context,
-                            );
-                          },
-                          child: const SizedBox(
-                            width: 250,
-                            child: AutoSizeText(
-                              'Зарегистрироваться',
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 60),
+                Container(
+                  height: 550,
+                  width: 301,
+                  decoration: BoxDecoration(
+                    color: Color(0xA64F81A3),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          const Text("Регистрация",
                               style: TextStyle(
-                                fontSize: 18,
-                                color: Color(0xFF313131),
-                                fontWeight: FontWeight.w700,
+                                  fontSize: 31,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 40),
+                          TextField(
+                            controller: _emailController,
+                            cursorHeight: 25,
+                            strutStyle: const StrutStyle(
+                              height: 2.5,
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 20),
+                              hintText: 'Email',
+                              hintStyle: const TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF212121),
+                                  fontWeight: FontWeight.w700),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
                               ),
-                              minFontSize: 12,
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            cursorHeight: 25,
+                            strutStyle: const StrutStyle(
+                              height: 2.5,
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 20),
+                              hintText: 'Пароль',
+                              hintStyle: const TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF212121),
+                                  fontWeight: FontWeight.w700),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 50),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              final email = _emailController.text.trim();
+                              final password = _passwordController.text.trim();
+                              final confirmPassword =
+                                  _confirmPasswordController.text.trim();
+
+                              if (password != confirmPassword) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Пароли не совпадают')),
+                                );
+                                return;
+                              }
+
+                              CreateUserWithLoginEmailAndPassword(
+                                email: email,
+                                password: password,
+                                context: context,
+                              );
+                            },
+                            child: const Text('Зарегистрироваться'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
