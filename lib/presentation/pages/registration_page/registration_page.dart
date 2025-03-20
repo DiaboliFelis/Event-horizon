@@ -86,7 +86,7 @@ class RegistrationScreen extends StatelessWidget {
                         ),
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.symmetric(vertical: 20.0,horizontal: 20),
-                          hintText: '   Email/логин',
+                          hintText: 'Email/логин',
                           hintStyle: const TextStyle(
                               fontSize: 16,
                               color: Color(0xFF212121),
@@ -116,7 +116,7 @@ class RegistrationScreen extends StatelessWidget {
                         ),
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.symmetric(vertical: 20.0,horizontal: 20),
-                          hintText: '   Пароль',
+                          hintText: 'Пароль',
                           hintStyle: const TextStyle(
                               fontSize: 16,
                               color: Color(0xFF212121),

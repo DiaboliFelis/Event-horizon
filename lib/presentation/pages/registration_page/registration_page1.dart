@@ -77,7 +77,8 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
         scaffoldBackgroundColor: Color(0xFFD8ECFF),
       ),
       home: Scaffold(
-        body: Center(
+        body: SingleChildScrollView(
+          child:Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -85,7 +86,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
             children: [
               const SizedBox(height: 60),
               Container(
-                height: 500,
+                height: 550,
                 width: 301,
                 decoration: BoxDecoration(
                   color: Color(0xA64F81A3),
@@ -111,7 +112,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: '   Email',
+                            hintText: 'Email',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
@@ -141,7 +142,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                 EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: '   Пароль',
+                            hintText: 'Пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
@@ -172,7 +173,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: '   Повторите пароль',
+                            hintText: 'Повторите пароль',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
@@ -203,7 +204,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           decoration: InputDecoration(
                             contentPadding:
                                 EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-                            hintText: '   Логин',
+                            hintText: 'Логин',
                             hintStyle: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF212121),
@@ -290,6 +291,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

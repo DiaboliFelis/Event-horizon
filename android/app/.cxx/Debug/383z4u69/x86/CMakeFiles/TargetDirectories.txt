@@ -1,0 +1,2 @@
+C:/Users/stray_cat/Desktop/qwerty2/Event-horizon/android/app/.cxx/Debug/383z4u69/x86/CMakeFiles/edit_cache.dir
+C:/Users/stray_cat/Desktop/qwerty2/Event-horizon/android/app/.cxx/Debug/383z4u69/x86/CMakeFiles/rebuild_cache.dir

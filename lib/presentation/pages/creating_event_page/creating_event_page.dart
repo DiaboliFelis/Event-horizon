@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreatingAnEventPage extends StatefulWidget {
   const CreatingAnEventPage({super.key});
@@ -52,6 +53,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     required String hintText,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
+    required void Function(String?)? onSaved,
   }) {
     return ConstrainedBox(
       // Add ConstrainedBox
@@ -72,22 +74,64 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
           errorStyle: const TextStyle(
-              fontSize: 12, color: Colors.red), // Adjust error style
+              fontSize: 10, color: Colors.red), // Adjust error style
           errorMaxLines: 1, // Limit error lines
         ),
         validator: validator,
+        onSaved: onSaved, // Привязываем onSaved к TextFormField
       ),
     );
   }
 
   // Обработчик сохранения данных
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Важно:  Здесь должна быть реализована логика сохранения данных
-      // Замените placeholder на код сохранения в базу данных, файл или другое хранилище
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Данные сохранены')),
-      );
+      _formKey.currentState!.save(); // Вызываем save() для сохранения данных
+
+      //  Определяем тип мероприятия
+      String eventTypeToSave;
+      if (selectedEventType == 'Другое') {
+        eventTypeToSave = customEventTypeController.text; // Из поля "Другое"
+      } else {
+        eventTypeToSave = selectedEventType!; // Из выпадающего списка
+      }
+
+      // Создаем карту с данными
+      final eventData = {
+        'eventName': _eventNameController.text,
+        'eventDescription': _eventDescriptionController.text,
+        'eventAddress': _eventAddressController.text,
+        'eventDate': _eventDateController.text,
+        'eventTime': _eventTimeController.text,
+        'eventType': eventTypeToSave, //  Сохраняем тип мероприятия
+      };
+
+      try {
+        // Сохраняем данные в Firestore и получаем DocumentReference
+        DocumentReference docRef = await FirebaseFirestore.instance
+            .collection('events')
+            .add(eventData);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Данные сохранены')),
+        );
+
+        // Получаем ID документа
+        String documentId = docRef.id;
+
+        // Используем Navigation.generateRoute для перехода
+        Navigator.pushNamed(
+          context,
+          '/eventInfo',
+          arguments: {'documentId': documentId}, // Передаем documentId
+        );
+      } catch (e) {
+        // Обрабатываем ошибки
+        print('Ошибка при сохранении в Firestore: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка сохранения: $e')),
+        );
+      }
     }
   }
 
@@ -163,11 +207,28 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                     _buildRoundedTextFormField(
                       controller: _eventNameController,
                       hintText: 'Название мероприятия',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Введите название мероприятия';
+                        }
+                        return null;
+                      },
+                      onSaved: (newValue) {
+                        // Сохраняем данные (например, в переменную eventName)
+                        // eventName = newValue; // Если нужно, создайте переменную
+                      },
                     ),
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
                       controller: _eventDescriptionController,
                       hintText: 'Описание мероприятия',
+                      validator: (value) {
+                        // Ваш валидатор для описания
+                        return null;
+                      },
+                      onSaved: (newValue) {
+                        // eventDescription = newValue;
+                      },
                     ),
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
@@ -175,6 +236,9 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                       hintText: 'ДД.ММ.ГГ',
                       keyboardType: TextInputType.datetime,
                       validator: _validateDate,
+                      onSaved: (newValue) {
+                        // eventDate = newValue;
+                      },
                     ),
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
@@ -182,13 +246,23 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                       hintText: 'Время мероприятия',
                       keyboardType: TextInputType.datetime,
                       validator: _validateTime,
+                      onSaved: (newValue) {
+                        // eventTime = newValue;
+                      },
                     ),
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
                       controller: _eventAddressController,
                       hintText: 'Адрес мероприятия',
+                      validator: (value) {
+                        // Ваш валидатор для адреса
+                        return null;
+                      },
+                      onSaved: (newValue) {
+                        // eventAddress = newValue;
+                      },
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 15),
 
                     // Ряд кнопок "Меню" и "Список гостей"
                     Row(
@@ -209,7 +283,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                       ],
                     ),
 
-                    const SizedBox(height: 30), // Отступ
+                    const SizedBox(height: 15), // Отступ
 
                     DropdownButtonFormField<String>(
                       value: selectedEventType,
@@ -278,10 +352,15 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                       },
                     ),
                     if (showTextField) // отображает текстовое поле если выбрано "Другое"
-                      TextField(
+                      TextFormField(
                         controller: customEventTypeController,
                         decoration: const InputDecoration(
                             labelText: 'Введите тип мероприятия'),
+                        onSaved: (newValue) {
+                          //  Сохраняем значение, введенное в поле "Другое"
+                          //  Например, можно сохранить его в переменную состояния
+                          //  customEventType = newValue;
+                        },
                       ), // Отступ
                   ],
                 ),
@@ -291,7 +370,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
           // Кнопка "Вишлист"
           Positioned(
             // Position the "Add Wishlist" button
-            bottom: 100, // Adjust as needed
+            bottom: 110, // Adjust as needed
             left: 0,
             right: 0,
             child: Align(
