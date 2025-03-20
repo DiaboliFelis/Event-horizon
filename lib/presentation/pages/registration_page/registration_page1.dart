@@ -2,6 +2,7 @@ import 'package:event_horizon/presentation/pages/profile_page/profile_page.dart'
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:email_validator/email_validator.dart';
 
 class RegistrationPage1 extends StatelessWidget {
   @override
@@ -242,6 +243,13 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                             if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || login.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Пожалуйста, заполните все поля')),
+                              );
+                              return;
+                            }
+
+                            if (!EmailValidator.validate(email)){
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Введите валидный адрес электронной почты')),
                               );
                               return;
                             }

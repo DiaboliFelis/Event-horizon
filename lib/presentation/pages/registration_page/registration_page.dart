@@ -27,7 +27,6 @@ class RegistrationScreen extends StatelessWidget {
     required BuildContext context,
   }) async {
     try {
-      UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
