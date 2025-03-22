@@ -1,0 +1,2 @@
+C:/Users/titan/Desktop/New folder (2)/Event-horizon/android/app/.cxx/Debug/3740405l/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/titan/Desktop/New folder (2)/Event-horizon/android/app/.cxx/Debug/3740405l/armeabi-v7a/CMakeFiles/rebuild_cache.dir
