@@ -36,7 +36,6 @@ class RegistrationScreen extends StatelessWidget {
         email: email,
         password: password,
       );
-      Navigator.pushReplacementNamed(context, '/menu');
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'Произошла ошибка. Пожалуйста, попробуйте снова.';
       if (e.code == 'wrong-password') {
@@ -116,6 +115,21 @@ class RegistrationScreen extends StatelessWidget {
                       child: const Text(
                         'Забыли пароль?',
                         style: TextStyle(decoration: TextDecoration.underline),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/registration1');
+                      },
+                      child: const Text(
+                        'Регистрация',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            decoration: TextDecoration.underline,
+                            fontSize: 20,
+                            decorationColor: Colors.white),
                       ),
                     ),
                   ],
