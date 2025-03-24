@@ -11,6 +11,7 @@ import 'package:event_horizon/presentation/pages/archive_of_events/archive_of_ev
 import 'package:event_horizon/presentation/pages/registration_page/registration_page.dart';
 import 'package:event_horizon/presentation/pages/registration_page/registration_page1.dart';
 import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
+import 'package:event_horizon/presentation/pages/food_page/information_food_page.dart';
 
 class Navigation {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -25,7 +26,15 @@ class Navigation {
       case '/wishlist':
         return MaterialPageRoute(builder: (context) => WishlistPage());
       case '/food':
-        return MaterialPageRoute(builder: (context) => FoodPage());
+        final args = settings.arguments as Map<String, dynamic>?;
+        final documentId =
+            args?['documentId'] as String?; //  Получаем documentId
+
+        return MaterialPageRoute(
+          builder: (context) => foodListScreen(
+            documentId: documentId ?? '', //  Используем documentId
+          ),
+        );
       case '/guest':
         return MaterialPageRoute(builder: (context) => GuestsPage());
       case '/profile':
@@ -56,6 +65,13 @@ class Navigation {
                   body:
                       Center(child: Text('Ошибка: Document ID отсутствует'))));
         }
+      case '/informationFood':
+        final args = settings.arguments as Map<String, dynamic>?;
+        final documentId = args?['documentId'] as String?;
+        return MaterialPageRoute(
+          builder: (context) =>
+              InformationFoodPage(documentId: documentId ?? ''),
+        );
       default:
         return MaterialPageRoute(
             builder: (context) => const Scaffold(

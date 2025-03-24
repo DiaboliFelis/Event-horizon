@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 class CreatingAnEventPage extends StatefulWidget {
   const CreatingAnEventPage({super.key});
@@ -16,6 +17,17 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
   final _eventAddressController = TextEditingController();
   final _eventDateController = TextEditingController();
   final _eventTimeController = TextEditingController();
+  String? eventTypeToSave;
+  String? documentId; //  Переменная для хранения documentId
+  String? tempDocumentId; //  Переменная для хранения tempDocumentId
+
+  @override
+  void initState() {
+    super.initState();
+    final uuid = Uuid();
+    tempDocumentId = uuid.v4(); //  Генерируем tempDocumentId при инициализации
+    documentId = tempDocumentId; //  Назначаем tempDocumentId как documentId
+  }
 
   // Валидатор для даты. Проверяет формат "ДД.ММ.ГГГГ"
   String? _validateDate(String? value) {
@@ -108,16 +120,17 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
 
       try {
         // Сохраняем данные в Firestore и получаем DocumentReference
-        DocumentReference docRef = await FirebaseFirestore.instance
+        await FirebaseFirestore.instance
             .collection('events')
-            .add(eventData);
+            .doc(tempDocumentId) //  Используем tempDocumentId при сохранении
+            .set(eventData);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Данные сохранены')),
         );
 
         // Получаем ID документа
-        String documentId = docRef.id;
+        tempDocumentId = null; //  Удаляем tempDocumentId
 
         // Используем Navigation.generateRoute для перехода
         Navigator.pushNamed(
@@ -271,7 +284,13 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                         _buildRoundedButton(
                             context,
                             'Меню',
-                            () => Navigator.pushNamed(context, '/food'),
+                            () => Navigator.pushNamed(
+                                  context,
+                                  '/food',
+                                  arguments: {
+                                    'documentId': tempDocumentId
+                                  }, //  Передаем tempDocumentId
+                                ),
                             const Color(0xFFD9D9D9),
                             const Size(160, 60)),
                         _buildRoundedButton(
