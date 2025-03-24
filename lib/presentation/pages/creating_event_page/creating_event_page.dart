@@ -397,7 +397,13 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
               child: _buildRoundedButton(
                 context,
                 'Можете добавить вишлист\n         (список желаний)',
-                () => Navigator.pushNamed(context, '/wishlist'),
+                () => Navigator.pushNamed(
+                  context,
+                  '/wishlist',
+                  arguments: {
+                    'documentId': tempDocumentId
+                  }, //  Передаем tempDocumentId
+                ),
                 const Color(0xA64F81A3),
                 const Size(280, 75),
               ),

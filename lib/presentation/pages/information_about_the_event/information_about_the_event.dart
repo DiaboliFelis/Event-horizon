@@ -70,7 +70,7 @@ class EventInfoScreen extends StatelessWidget {
       );
     }
     //Функция для создания закругленного контейнера с заголовком
-    
+
     Widget _buildRoundedTitle(String title, Size size) {
       return Container(
         child: Center(
@@ -85,9 +85,12 @@ class EventInfoScreen extends StatelessWidget {
         ),
       );
     }
+
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: const Color(0xFFD0E4F7),
+        title: const Text('Мероприятие'),
       ),
       backgroundColor: const Color(0xFFD0E4F7),
       body: BlocProvider<EventCubit>(
@@ -110,7 +113,7 @@ class EventInfoScreen extends StatelessWidget {
                     _buildRoundedTitle(
                         successState.eventdata.eventName ?? 'Нет названия',
                         const Size(351, 60)),
-                    SizedBox(height: 250),
+                    SizedBox(height: 220),
                     _buildRoundedTextFormField(
                         initialValue:
                             successState.eventdata.eventType ?? 'Нет типа'),
@@ -137,7 +140,7 @@ class EventInfoScreen extends StatelessWidget {
                     _buildRoundedTextFormField(
                         initialValue: successState.eventdata.eventAddress ??
                             'Нет адреса'),
-                    SizedBox(height: 50),
+                    SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -154,12 +157,32 @@ class EventInfoScreen extends StatelessWidget {
                         _buildRoundedButton(
                             context,
                             'Список гостей',
-                            () => Navigator.pushNamed(context, '/guestlist'),
+                            () => Navigator.pushNamed(context, '/guest'),
                             const Color(0xFFD9D9D9),
                             const Size(160, 70)),
                       ],
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 15), // Отступ
+
+                    // Кнопка "Вишлист"
+                    Align(
+                      alignment: Alignment
+                          .center, // Центрирование по горизонтали и вертикали
+                      child: Wrap(
+                        children: [
+                          _buildRoundedButton(
+                              context,
+                              'Вишлист',
+                              () => Navigator.pushNamed(
+                                    context,
+                                    '/informationwishlist',
+                                    arguments: {'documentId': documentId},
+                                  ),
+                              const Color(0xA64F81A3),
+                              const Size(280, 75)),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

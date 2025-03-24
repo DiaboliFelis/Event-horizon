@@ -12,6 +12,7 @@ import 'package:event_horizon/presentation/pages/registration_page/registration_
 import 'package:event_horizon/presentation/pages/registration_page/registration_page1.dart';
 import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
 import 'package:event_horizon/presentation/pages/food_page/information_food_page.dart';
+import 'package:event_horizon/presentation/pages/wishlist_page/information_wishlist_page.dart';
 
 class Navigation {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -24,7 +25,15 @@ class Navigation {
         return MaterialPageRoute(
             builder: (context) => const CreatingAnEventPage());
       case '/wishlist':
-        return MaterialPageRoute(builder: (context) => WishlistPage());
+        final args = settings.arguments as Map<String, dynamic>?;
+        final documentId =
+            args?['documentId'] as String?; //  Получаем documentId
+
+        return MaterialPageRoute(
+          builder: (context) => WishlistListScreen(
+            documentId: documentId ?? '', //  Используем documentId
+          ),
+        );
       case '/food':
         final args = settings.arguments as Map<String, dynamic>?;
         final documentId =
@@ -71,6 +80,13 @@ class Navigation {
         return MaterialPageRoute(
           builder: (context) =>
               InformationFoodPage(documentId: documentId ?? ''),
+        );
+      case '/informationwishlist':
+        final args = settings.arguments as Map<String, dynamic>?;
+        final documentId = args?['documentId'] as String?;
+        return MaterialPageRoute(
+          builder: (context) =>
+              InformationWishlistPage(documentId: documentId ?? ''),
         );
       default:
         return MaterialPageRoute(
