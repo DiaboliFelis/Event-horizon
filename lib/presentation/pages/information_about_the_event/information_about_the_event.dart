@@ -42,7 +42,7 @@ class EventInfoScreen extends StatelessWidget {
       int maxLines = 1,
       TextInputType keyboardType = TextInputType.text,
       String? Function(String?)? validator,
-      Color boxColor = const Color(0xFF84C6EA),
+      Color boxColor = const Color(0xA64F81A3),
       Color textColor = Colors.black,
     }) {
       return SizedBox(
@@ -69,22 +69,15 @@ class EventInfoScreen extends StatelessWidget {
         ),
       );
     }
-
     //Функция для создания закругленного контейнера с заголовком
+    
     Widget _buildRoundedTitle(String title, Size size) {
       return Container(
-        width: size.width,
-        height: size.height,
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: const Color(0xA64F81A3),
-          borderRadius: BorderRadius.circular(50.0),
-        ),
         child: Center(
           child: Text(
             title,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -92,11 +85,9 @@ class EventInfoScreen extends StatelessWidget {
         ),
       );
     }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFD0E4F7),
-        title: const Text('Создание мероприятия'),
       ),
       backgroundColor: const Color(0xFFD0E4F7),
       body: BlocProvider<EventCubit>(
