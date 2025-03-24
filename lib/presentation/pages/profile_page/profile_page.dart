@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-//import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ProfilePage extends StatelessWidget {
+class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +77,7 @@ class ProfilePage extends StatelessWidget {
               onPressed: () {
                 String newName = nameController.text;
                 if (newName.isNotEmpty) {
-                  // добавить логику сохранения
+                  // Добавить логику сохранения
                 }
                 Navigator.pop(context);
               },
@@ -93,12 +94,45 @@ class ProfilePage extends StatelessWidget {
     /*final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      // добавить логику сохранения
+      // Добавить логику сохранения
     }*/
   }
 }
 
-class MyProfile extends StatelessWidget {
+class MyProfile extends StatefulWidget {
+  @override
+  _MyProfileState createState() => _MyProfileState();
+}
+
+class _MyProfileState extends State<MyProfile> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _loginController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userData = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      // Приведение данных к Map<String, dynamic>
+      if (userData.exists) {
+        final data = userData.data() as Map<String, dynamic>;
+        setState(() {
+          _nameController.text = data['name'] ?? '';
+          _loginController.text = data['email'] ?? '';
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -127,6 +161,7 @@ class MyProfile extends StatelessWidget {
               SizedBox(
                 width: 300,
                 child: TextField(
+                  controller: _nameController,
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     hintText: 'Имя пользователя',
@@ -140,11 +175,12 @@ class MyProfile extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 20), // Увеличенное расстояние между полями
+              const SizedBox(height: 20),
               SizedBox(
                 width: 300,
                 child: TextField(
-                  textAlign: TextAlign.center, // Выравнивание текста по центру
+                  controller: _loginController,
+                  textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     hintText: 'Логин',
                     hintStyle: const TextStyle(color: Colors.white70),

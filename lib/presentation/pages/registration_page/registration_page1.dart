@@ -1,7 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_horizon/presentation/pages/profile_page/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:email_validator/email_validator.dart';
 
 class RegistrationPage1 extends StatelessWidget {
@@ -16,9 +16,10 @@ class RegistrationPage1 extends StatelessWidget {
   }
 }
 
-void CreateUserWithLoginEmailAndPassword({
+Future<void> CreateUserWithLoginEmailAndPassword({
   required String email,
   required String password,
+  required String login,
   required BuildContext context,
 }) async {
   try {
@@ -27,6 +28,12 @@ void CreateUserWithLoginEmailAndPassword({
       email: email,
       password: password,
     );
+
+    // Сохраняем логин в Firestore
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userCredential.user!.uid)
+        .set({'login': login, 'email': email});
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Пользователь зарегистрирован успешно!')),
@@ -62,21 +69,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _loginController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => ProfilePage()),
-          );
-        });
-      }
-    });
-  }
 
   @override
   void dispose() {
@@ -195,10 +187,12 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           final password = _passwordController.text.trim();
                           final confirmPassword =
                               _confirmPasswordController.text.trim();
+                          final login = _loginController.text.trim();
 
                           if (email.isEmpty ||
                               password.isEmpty ||
-                              confirmPassword.isEmpty) {
+                              confirmPassword.isEmpty ||
+                              login.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content:
@@ -227,6 +221,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           CreateUserWithLoginEmailAndPassword(
                             email: email,
                             password: password,
+                            login: login,
                             context: context,
                           );
                         },
@@ -245,6 +240,50 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        body: Center(
+          child: Text("Вы не авторизованы"),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Профиль"),
+      ),
+      body: FutureBuilder<DocumentSnapshot>(
+        future:
+            FirebaseFirestore.instance.collection('users').doc(user.uid).get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Center(child: Text("Данные пользователя не найдены."));
+          }
+
+          final userData = snapshot.data!.data() as Map<String, dynamic>;
+          final login = userData['login'] ?? 'Нет логина';
+
+          return Center(
+            child: Text(
+              "Ваш логин: $login",
+              style: TextStyle(fontSize: 20),
+            ),
+          );
+        },
       ),
     );
   }
