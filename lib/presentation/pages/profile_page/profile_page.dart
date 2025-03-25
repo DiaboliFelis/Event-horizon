@@ -1,166 +1,100 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-//import 'package:image_picker/image_picker.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  User? _user;
+  String _userName = ''; //  Мы больше не используем displayName
+  String _userEmail = '';
+  String _userImageUrl = '';
+  String _userLogin = ''; //  Добавляем переменную для логина
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      setState(() {
+        _user = user;
+        _userImageUrl = user.photoURL ?? '';
+      });
+
+      //  Получаем данные пользователя из Firestore
+      DocumentSnapshot<Map<String, dynamic>> snapshot =
+          await FirebaseFirestore.instance
+              .collection('users') // Замени 'users' на имя своей коллекции
+              .doc(user.uid)
+              .get();
+
+      if (snapshot.exists) {
+        setState(() {
+          _userLogin = snapshot.data()?['login'] ??
+              'Не указано'; //  Получаем логин из Firestore (поле 'login')
+          _userName = snapshot.data()?['name'] ??
+              'Не указано'; //  Получаем имя пользователя из Firestore (поле 'name')
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFD8ECFF),
+        title: Text('Профиль'),
         actions: [
           IconButton(
-            icon: Icon(Icons.more_vert),
+            icon: Icon(Icons.edit),
             onPressed: () {
-              _showOptionsDialog(context);
+              // Здесь можно добавить логику для изменения имени или фото
             },
           ),
         ],
       ),
-      body: MyProfile(),
-    );
-  }
-
-  // Отображение диалогового окна
-  void _showOptionsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Выберите действие"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.edit),
-                title: Text("Изменить имя"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showChangeNameDialog(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.photo),
-                title: Text("Изменить фото"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImageFromGallery(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Отображение диалога изменения имени
-  void _showChangeNameDialog(BuildContext context) {
-    TextEditingController nameController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Изменить имя"),
-          content: TextField(
-            controller: nameController,
-            decoration: InputDecoration(hintText: "Введите новое имя"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("Отмена"),
-            ),
-            TextButton(
-              onPressed: () {
-                String newName = nameController.text;
-                if (newName.isNotEmpty) {
-                  // добавить логику сохранения
-                }
-                Navigator.pop(context);
-              },
-              child: Text("Сохранить"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Выбор фото из галереи
-  void _pickImageFromGallery(BuildContext context) async {
-    /*final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      // добавить логику сохранения
-    }*/
-  }
-}
-
-class MyProfile extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFFD8ECFF),
-      child: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                width: 250,
-                height: 250,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF4F81A3),
-                  shape: BoxShape.circle,
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/account_icon.png', // Путь для иконки
-                    width: 10,
-                    height: 10,
+      body: _user == null
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 80,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage: _userImageUrl.isNotEmpty
+                        ? NetworkImage(_userImageUrl)
+                        : AssetImage('assets/account_icon.png')
+                            as ImageProvider,
                   ),
-                ),
-              ),
-              const SizedBox(height: 100),
-              SizedBox(
-                width: 300,
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: 'Имя пользователя',
-                    hintStyle: const TextStyle(color: Colors.white70),
-                    filled: true,
-                    fillColor: const Color(0xFF4F81A3),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
+                  SizedBox(height: 20),
+                  Text(
+                    _userLogin, //  Отображаем логин
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 20), // Увеличенное расстояние между полями
-              SizedBox(
-                width: 300,
-                child: TextField(
-                  textAlign: TextAlign.center, // Выравнивание текста по центру
-                  decoration: InputDecoration(
-                    hintText: 'Логин',
-                    hintStyle: const TextStyle(color: Colors.white70),
-                    filled: true,
-                    fillColor: const Color(0xFF4F81A3),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
+                  SizedBox(height: 10),
+                  Text(
+                    _userEmail,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
                     ),
                   ),
-                ),
+                  // Здесь можно добавить другие данные о пользователе, если они есть
+                ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

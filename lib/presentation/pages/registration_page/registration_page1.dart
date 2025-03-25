@@ -1,9 +1,64 @@
-import 'package:event_horizon/presentation/pages/profile_page/profile_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:event_horizon/presentation/pages/profile_page/profile_page.dart';
 
+// Функция для регистрации нового пользователя с логином и паролем
+Future<void> CreateUserWithLoginEmailAndPassword({
+  required String email,
+  required String password,
+  required String login,
+  required BuildContext context,
+}) async {
+  try {
+    // Создание пользователя с email и паролем
+    UserCredential userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    // Сохраняем логин и email в Firestore после регистрации
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userCredential.user!.uid)
+        .set({
+      'login': login,
+      'email': email,
+      'name': '', // Имя, которое пользователь может изменить позже
+    });
+
+    // Уведомление о успешной регистрации
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Пользователь зарегистрирован успешно!')),
+    );
+
+    // Переход на страницу профиля после регистрации
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => ProfilePage()));
+  } on FirebaseAuthException catch (e) {
+    // Обработка ошибок регистрации
+    String errorMessage = 'Произошла ошибка. Пожалуйста, повторите позднее.';
+    if (e.code == 'weak-password') {
+      errorMessage = 'Слишком простой пароль.';
+    } else if (e.code == 'email-already-in-use') {
+      errorMessage = 'Аккаунт с такой почтой уже существует.';
+    }
+
+    // Отображение ошибки пользователю
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(errorMessage)),
+    );
+  } catch (e) {
+    // Обработка неожиданной ошибки
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Неожиданная ошибка.')),
+    );
+  }
+}
+
+// Страница регистрации
 class RegistrationPage1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -16,42 +71,7 @@ class RegistrationPage1 extends StatelessWidget {
   }
 }
 
-void CreateUserWithLoginEmailAndPassword({
-  required String email,
-  required String password,
-  required BuildContext context,
-}) async {
-  try {
-    UserCredential userCredential =
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Пользователь зарегистрирован успешно!')),
-    );
-
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => ProfilePage()));
-  } on FirebaseAuthException catch (e) {
-    String errorMessage = 'Произошла ошибка. Пожалуйста, повторите позднее.';
-    if (e.code == 'weak-password') {
-      errorMessage = 'Слишком простой пароль.';
-    } else if (e.code == 'email-already-in-use') {
-      errorMessage = 'Аккаунт с такой почтой уже существует.';
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(errorMessage)),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Неожиданная ошибка.')),
-    );
-  }
-}
-
+// Экран регистрации с формой
 class RegistrationScreen1 extends StatefulWidget {
   @override
   _RegistrationScreen1State createState() => _RegistrationScreen1State();
@@ -62,21 +82,6 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _loginController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => ProfilePage()),
-          );
-        });
-      }
-    });
-  }
 
   @override
   void dispose() {
@@ -195,10 +200,13 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           final password = _passwordController.text.trim();
                           final confirmPassword =
                               _confirmPasswordController.text.trim();
+                          final login = _loginController.text.trim();
 
+                          // Проверка на пустые поля
                           if (email.isEmpty ||
                               password.isEmpty ||
-                              confirmPassword.isEmpty) {
+                              confirmPassword.isEmpty ||
+                              login.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content:
@@ -207,6 +215,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                             return;
                           }
 
+                          // Проверка валидности email
                           if (!EmailValidator.validate(email)) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -216,6 +225,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                             return;
                           }
 
+                          // Проверка на совпадение паролей
                           if (password != confirmPassword) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -224,9 +234,11 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                             return;
                           }
 
+                          // Создание пользователя
                           CreateUserWithLoginEmailAndPassword(
                             email: email,
                             password: password,
+                            login: login,
                             context: context,
                           );
                         },
