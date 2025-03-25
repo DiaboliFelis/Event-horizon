@@ -21,6 +21,9 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
   String? eventTypeToSave;
   String? documentId; //  Переменная для хранения documentId
   String? tempDocumentId; //  Переменная для хранения tempDocumentId
+  TextEditingController customEventTypeController = TextEditingController();
+  String? selectedEventType;
+  bool showTextField = false;
 
   @override
   void initState() {
@@ -30,34 +33,73 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     documentId = tempDocumentId; //  Назначаем tempDocumentId как documentId
   }
 
-  // Валидатор для даты. Проверяет формат "ДД.ММ.ГГГГ"
-  String? _validateDate(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Введите дату в формате ДД.ММ.ГГГГ';
-    }
+  @override
+  void dispose() {
+    _eventNameController.dispose();
+    _eventDescriptionController.dispose();
+    _eventAddressController.dispose();
+    _eventDateController.dispose();
+    _eventTimeController.dispose();
+    customEventTypeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
     try {
-      final parsedDate = DateFormat("dd.MM.yyyy").parse(value);
-      if (parsedDate
-          .isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
-        // Сравниваем с "вчера", чтобы разрешить текущую дату
-        return 'Дата должна быть сегодняшней или будущей';
-      }
-      return null; // Дата валидна
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Выберите дату'),
+            content: SizedBox(
+              width: 300,
+              height: 400,
+              child: CalendarDatePicker(
+                // Или любой другой виджет выбора даты
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2030),
+                onDateChanged: (DateTime newDate) {
+                  setState(() {
+                    _eventDateController.text =
+                        DateFormat('dd.MM.yyyy').format(newDate);
+                  });
+                  Navigator.pop(context); // Закрыть диалог
+                },
+              ),
+            ),
+          );
+        },
+      );
     } catch (e) {
-      return 'Неверный формат даты';
+      print('Ошибка в _selectDate: $e');
     }
   }
 
-  // Валидатор для времени. Проверяет формат "ЧЧ:мм"
+// Валидатор для времени. Проверяет формат "ЧЧ:мм" (без изменений)
   String? _validateTime(String? value) {
     if (value == null || value.isEmpty) {
       return 'Введите время в формате ЧЧ:мм';
     }
     try {
-      DateFormat("HH:mm").parse(value);
-      return null; // Время валидно
+      DateFormat("HH:mm").parseStrict(value);
+      return null;
     } catch (e) {
-      return 'Неверный формат времени';
+      return 'Неверный формат времени.  Используйте формат ЧЧ:мм';
+    }
+  }
+
+  // Функция для выбора времени
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _eventTimeController.text =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      });
     }
   }
 
@@ -67,6 +109,9 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
     required void Function(String?)? onSaved,
+    bool readOnly = false,
+    Widget? suffixIcon,
+    VoidCallback? onTap,
   }) {
     return ConstrainedBox(
       // Add ConstrainedBox
@@ -76,6 +121,8 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        readOnly: readOnly,
+        onTap: onTap,
         decoration: InputDecoration(
           hintText: hintText,
           filled: true,
@@ -88,7 +135,8 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
               const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
           errorStyle: const TextStyle(
               fontSize: 10, color: Colors.red), // Adjust error style
-          errorMaxLines: 1, // Limit error lines
+          errorMaxLines: 1,
+          suffixIcon: suffixIcon, // Limit error lines
         ),
         validator: validator,
         onSaved: onSaved, // Привязываем onSaved к TextFormField
@@ -196,10 +244,6 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     );
   }
 
-  String? selectedEventType; // объявьте переменную вне build
-  bool showTextField = false; // для отображения текстового поля
-  TextEditingController customEventTypeController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -250,22 +294,39 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
                       controller: _eventDateController,
-                      hintText: 'ДД.ММ.ГГ',
-                      keyboardType: TextInputType.datetime,
-                      validator: _validateDate,
-                      onSaved: (newValue) {
-                        // eventDate = newValue;
+                      hintText: 'Дата мероприятия',
+                      readOnly: true,
+                      onTap: () {
+                        print('onTap triggered');
+                        _selectDate(context);
                       },
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () {
+                          print('IconButton onPressed triggered');
+                          _selectDate(context);
+                        },
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Выберите дату мероприятия';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {},
                     ),
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
                       controller: _eventTimeController,
                       hintText: 'Время мероприятия',
-                      keyboardType: TextInputType.datetime,
+                      readOnly: true, //  Добавлено
+                      onTap: () => _selectTime(context), //  Изменено
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.access_time), //  Изменено
+                        onPressed: () => _selectTime(context), //  Изменено
+                      ),
                       validator: _validateTime,
-                      onSaved: (newValue) {
-                        // eventTime = newValue;
-                      },
+                      onSaved: (newValue) {},
                     ),
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
@@ -311,7 +372,6 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                     DropdownButtonFormField<String>(
                       value: selectedEventType,
                       decoration: InputDecoration(
-                        labelText: 'Тип мероприятия',
                         labelStyle:
                             TextStyle(color: Colors.black), // Стиль подписи
                         hintText: 'Выберите тип', // Подсказка
@@ -431,15 +491,5 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _eventNameController.dispose();
-    _eventDescriptionController.dispose();
-    _eventAddressController.dispose();
-    _eventDateController.dispose();
-    _eventTimeController.dispose();
-    super.dispose();
   }
 }
