@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class Menu extends StatelessWidget {
@@ -97,61 +98,68 @@ class CustomBody extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Wrap(
+                Wrap(
                   alignment: WrapAlignment.center,
-                  children: [
+                  children: const [
                     Text(
                       'Список предстоящих мероприятий',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
-                        // fontWeight: FontWeight.bold
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4F81A3),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 200,
-                        child: ListView.builder(
-                          itemCount: 10,
-                          itemBuilder: (context, index) {
-                            return Container(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Мероприятие ${index + 1}', // Название мероприятия
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),
+                SizedBox(
+                  height: 200,
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('events')
+                        .orderBy('eventDate',
+                            descending: false) // Сортировка по возрастанию даты
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final document = snapshot.data!.docs[index];
+                          final eventName = document['eventName'] as String? ??
+                              'Без названия';
+                          final eventDate = document['eventDate'] as String? ??
+                              'Дата не указана'; // Получаем дату
+
+                          return Container(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  eventName, // Название мероприятия из Firebase
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
-                                  Text(
-                                    '${21 + index}.11.2024', // Дата мероприятия (пример)
-                                    style: const TextStyle(
-                                        fontSize: 16, color: Colors.white),
+                                ),
+                                Text(
+                                  eventDate, // Дата мероприятия из Firebase
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
                                   ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],
