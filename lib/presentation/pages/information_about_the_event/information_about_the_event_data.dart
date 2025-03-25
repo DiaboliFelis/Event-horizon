@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -44,23 +45,36 @@ class EventCubit extends Cubit<InformationAboutTheEventState> {
         eventTime: null,
         eventAddress: null);
     try {
-//Получаем информацию о созданном мероприятии по id из firebase
-      final doc = await FirebaseFirestore.instance
+      final user =
+          FirebaseAuth.instance.currentUser; //  Получаем текущего пользователя
+      if (user == null) {
+        // Если пользователь не авторизован, показываем пустые данные
+        emit(InfAboutTheEventLoadSuccess(emptyData));
+        return; //  Прерываем выполнение функции
+      }
+      // Получаем все мероприятия, созданные текущим пользователем
+      final querySnapshot = await FirebaseFirestore.instance
           .collection('events')
-          .doc(documentId)
+          .where('userId', isEqualTo: user.uid)
           .get();
 
-//Проверяем есть ли мероприятие
-      if (doc.exists) {
+      // Ищем нужный документ по documentId среди результатов запроса
+      DocumentSnapshot? doc;
+      for (var document in querySnapshot.docs) {
+        if (document.id == documentId) {
+          doc = document;
+          break; // Нашли нужный документ, выходим из цикла
+        }
+      }
+
+      //Проверяем, нашли ли мы документ
+      if (doc != null && doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
         final eventdata = EventData(
             eventName: data['eventName'],
             eventType: data['eventType'],
             eventDate: data['eventTime'],
             eventTime: data['eventDate'],
-            // eventDate: (data['eventDate'] as Timestamp).toDate(), // посмотреть, почему падает тип данных
-            // eventTime: TimeOfDay.fromDateTime(
-            //     DateFormat('HH:mm').parse(data['eventTime'])),
             eventAddress: data['eventAddress']);
 
 //Передаём состояние и данные на страницу

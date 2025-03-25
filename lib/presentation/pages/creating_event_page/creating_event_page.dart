@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -98,48 +99,51 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
   // Обработчик сохранения данных
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save(); // Вызываем save() для сохранения данных
+      _formKey.currentState!.save();
 
-      //  Определяем тип мероприятия
       String eventTypeToSave;
       if (selectedEventType == 'Другое') {
-        eventTypeToSave = customEventTypeController.text; // Из поля "Другое"
+        eventTypeToSave = customEventTypeController.text;
       } else {
-        eventTypeToSave = selectedEventType!; // Из выпадающего списка
+        eventTypeToSave = selectedEventType!;
       }
 
-      // Создаем карту с данными
-      final eventData = {
-        'eventName': _eventNameController.text,
-        'eventDescription': _eventDescriptionController.text,
-        'eventAddress': _eventAddressController.text,
-        'eventDate': _eventDateController.text,
-        'eventTime': _eventTimeController.text,
-        'eventType': eventTypeToSave, //  Сохраняем тип мероприятия
-      };
-
       try {
-        // Сохраняем данные в Firestore и получаем DocumentReference
-        await FirebaseFirestore.instance
-            .collection('events')
-            .doc(tempDocumentId) //  Используем tempDocumentId при сохранении
-            .set(eventData);
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          final eventData = {
+            'eventName': _eventNameController.text,
+            'eventDescription': _eventDescriptionController.text,
+            'eventAddress': _eventAddressController.text,
+            'eventDate': _eventDateController.text,
+            'eventTime': _eventTimeController.text,
+            'eventType': eventTypeToSave,
+            'userId': user.uid, //  Сохраняем ID пользователя
+          };
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Данные сохранены')),
-        );
+          // Сохраняем данные в Firestore
+          await FirebaseFirestore.instance
+              .collection('events')
+              .doc(tempDocumentId)
+              .set(eventData);
 
-        // Получаем ID документа
-        tempDocumentId = null; //  Удаляем tempDocumentId
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Данные сохранены')),
+          );
 
-        // Используем Navigation.generateRoute для перехода
-        Navigator.pushNamed(
-          context,
-          '/eventInfo',
-          arguments: {'documentId': documentId}, // Передаем documentId
-        );
+          tempDocumentId = null;
+
+          Navigator.pushNamed(
+            context,
+            '/eventInfo',
+            arguments: {'documentId': documentId},
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Пользователь не авторизован')),
+          );
+        }
       } catch (e) {
-        // Обрабатываем ошибки
         print('Ошибка при сохранении в Firestore: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Ошибка сохранения: $e')),

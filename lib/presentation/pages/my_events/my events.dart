@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
@@ -25,7 +26,10 @@ class MyEvents extends StatelessWidget {
     return Container(
       color: const Color(0xFFD8ECFF),
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('events').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('events')
+            .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+            .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             print(
