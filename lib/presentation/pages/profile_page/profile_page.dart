@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:event_horizon/presentation/pages/registration_page/registration_page.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -29,11 +30,11 @@ class _ProfilePageState extends State<ProfilePage> {
       });
 
       //  Получаем данные пользователя из Firestore
-      DocumentSnapshot<Map<String, dynamic>> snapshot =
-          await FirebaseFirestore.instance
-              .collection('users') // Замени 'users' на имя своей коллекции
-              .doc(user.uid)
-              .get();
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
       if (snapshot.exists) {
         setState(() {
@@ -56,20 +57,28 @@ class _ProfilePageState extends State<ProfilePage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              /*ListTile(
-                leading: Icon(Icons.edit),
-                title: Text("Изменить имя"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showChangeNameDialog(context);
-                },
-              ),*/
               ListTile(
                 leading: Icon(Icons.photo),
                 title: Text("Изменить фото"),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImageFromGallery(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.logout),
+                title: Text("Выйти из аккаунта"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _logoutUser(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete),
+                title: Text("Удалить аккаунт"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteAccount(context);
                 },
               ),
             ],
@@ -79,48 +88,45 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Отображение диалога изменения имени
-  /*void _showChangeNameDialog(BuildContext context) {
-    TextEditingController nameController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Изменить имя"),
-          content: TextField(
-            controller: nameController,
-            decoration: InputDecoration(hintText: "Введите новое имя"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("Отмена"),
-            ),
-            TextButton(
-              onPressed: () {
-                String newName = nameController.text;
-                if (newName.isNotEmpty) {
-                  // добавить логику сохранения
-                }
-                Navigator.pop(context);
-              },
-              child: Text("Сохранить"),
-            ),
-          ],
-        );
-      },
+  // Выход из аккаунта
+  Future<void> _logoutUser(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => RegistrationPage()),
     );
-  }*/
+  }
+
+  // Удаление аккаунта
+  Future<void> _deleteAccount(BuildContext context) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Удаляем данные пользователя из Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .delete();
+
+        // Удаляем аккаунт
+        await user.delete();
+
+        // Переход на страницу регистрации
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RegistrationPage()),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Не удалось удалить аккаунт: $e')),
+      );
+    }
+  }
 
   // Выбор фото из галереи
   void _pickImageFromGallery(BuildContext context) async {
-    /*final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      // добавить логику сохранения
-    }*/
+    // Реализация выбора фото из галереи
   }
 
   @override
