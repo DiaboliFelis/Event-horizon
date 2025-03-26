@@ -134,41 +134,73 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (image != null) {
       File imageFile = File(image.path);
-      String userId = FirebaseAuth.instance.currentUser!.uid;
-      String fileName = 'profile_image_$userId.jpg'; // Уникальное имя файла
 
-      try {
-        // Загрузка файла в Firebase Storage
-        Reference storageRef =
-            FirebaseStorage.instance.ref().child('profile_images/$fileName');
-        UploadTask uploadTask = storageRef.putFile(imageFile);
-        TaskSnapshot snapshot = await uploadTask.whenComplete(() => null);
+      // Проверка существования файла
+      if (await imageFile.exists()) {
+        String? userId = FirebaseAuth.instance.currentUser?.uid;
 
-        // Получение URL загруженного изображения
-        String downloadURL = await snapshot.ref.getDownloadURL();
+        if (userId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Пользователь не найден.')),
+          );
+          return;
+        }
 
-        // Обновление photoURL в Firebase Auth
-        await FirebaseAuth.instance.currentUser?.updatePhotoURL(downloadURL);
+        String fileName = 'profile_image_$userId.jpg';
 
-        // Обновление URL в Firestore, если необходимо
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .update({'photoURL': downloadURL});
+// Проверка на наличие недопустимых символов
+        RegExp regExp = RegExp(r'^[a-zA-Z0-9_\.]+$');
+        if (!regExp.hasMatch(fileName)) {
+          print("fileName содержит недопустимые символы: $fileName");
+        } else {
+          print("fileName корректен: $fileName");
+        }
 
-        // Обновление UI
-        setState(() {
-          _userImageUrl = downloadURL;
-        });
+        try {
+          // Загрузка файла в Firebase Storage
+          Reference storageRef =
+              FirebaseStorage.instance.ref().child('profile_images/$fileName');
+          UploadTask uploadTask = storageRef.putFile(imageFile);
+          TaskSnapshot snapshot = await uploadTask;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Фото профиля успешно обновлено!')),
-        );
-      } catch (error) {
-        print("Ошибка при загрузке фото: $error");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка при загрузке фото: $error')),
-        );
+          if (snapshot.state == TaskState.success) {
+            String downloadURL = await snapshot.ref.getDownloadURL();
+            print("Изображение успешно загружено: $downloadURL");
+
+            // Обновление photoURL в Firebase Auth
+            await FirebaseAuth.instance.currentUser
+                ?.updatePhotoURL(downloadURL);
+
+            // Обновление URL в Firestore
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .update({'photoURL': downloadURL});
+
+            // Обновление UI
+            if (mounted) {
+              setState(() {
+                _userImageUrl = downloadURL;
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Фото профиля успешно обновлено!')),
+              );
+            }
+          } else {
+            print("Ошибка при загрузке изображения: ${snapshot.state}");
+          }
+        } catch (error) {
+          print("Ошибка при загрузке фото: $error");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Ошибка при загрузке фото: $error')),
+            );
+          }
+        }
+      } else {
+        print("Файл не найден");
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

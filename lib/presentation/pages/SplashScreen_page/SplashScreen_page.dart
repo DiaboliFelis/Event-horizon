@@ -18,120 +18,30 @@ class _SplashscreenState extends State<Splashscreen> {
     // });
     return Scaffold(
       backgroundColor: const Color.fromRGBO(127, 166, 195, 1.0), // Цвет фона
-      body: const Row(
-        // color: const Color.fromRGBO(127, 166, 195, 1.0),
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 25),
         children: [
           Column(
             children: [
-              SizedBox(
-                height: 150,
-              ), // Отступ от верхней части экрана
-              Text(
-                'Привет!',
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Colors.white,
-                ),
-              ),
-
-              SizedBox(
-                height: 50,
-              ),
-              Text(
-                'Это приложение для создания,',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'планирования и управления',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'мероприятиями различных форматов:',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'от небольших встреч до крупных',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'праздников.',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-
-              SizedBox(
-                height: 50,
-              ),
-              Text(
-                'С этим приложением вы можете',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'организовывать события, приглашать',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'ваших друзей, обмениваться',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'информацией и управлять всеми',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'аспектами мероприятия в одном',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'месте.',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-
-              SizedBox(
-                height: 50,
-              ),
-              Text(
-                'Удачи!',
-                style: TextStyle(
-                  fontSize: 30,
-                  color: Colors.white,
-                ),
-              ),
+              _buildSizedBox(),
+              _buildText('Привет!', 30),
+              _buildSizedBox(),
+              _buildText('Это приложение для создания,', 20),
+              _buildText('планирования и управления', 20),
+              _buildText('мероприятиями различных форматов:', 20),
+              _buildText('от небольших встреч до крупных', 20),
+              _buildText('праздников.', 20),
+              _buildSizedBox(),
+              _buildText('С этим приложением вы можете', 20),
+              _buildText('организовывать события, приглашать', 20),
+              _buildText('ваших друзей, обмениваться', 20),
+              _buildText('информацией и управлять всеми', 20),
+              _buildText('аспектами мероприятия в одном', 20),
+              _buildText('месте.', 20),
+              _buildSizedBox(),
+              _buildText('Удачи!', 30),
             ],
-          )
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -144,5 +54,20 @@ class _SplashscreenState extends State<Splashscreen> {
         child: const Text('Далее'), // Надпись в кнопке
       ),
     );
+  }
+
+  Widget _buildText(String text, double fontSize) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: fontSize,
+        color: Colors.white,
+      ),
+      textAlign: TextAlign.center, // Выравнивание текста по центру
+    );
+  }
+
+  Widget _buildSizedBox() {
+    return const SizedBox(height: 50); // Отступ
   }
 }
