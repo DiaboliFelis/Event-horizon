@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:event_horizon/presentation/pages/registration_page/registration_page.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -124,9 +127,54 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // Выбор фото из галереи
-  void _pickImageFromGallery(BuildContext context) async {
-    // Реализация выбора фото из галереи
+// Выбор фото из галереи и загрузка на Firebase Storage
+  Future<void> _pickImageFromGallery(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      File imageFile = File(image.path);
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      String fileName = 'profile_image_$userId.jpg'; // Уникальное имя файла
+
+      try {
+        // Загрузка файла в Firebase Storage
+        Reference storageRef =
+            FirebaseStorage.instance.ref().child('profile_images/$fileName');
+        UploadTask uploadTask = storageRef.putFile(imageFile);
+        TaskSnapshot snapshot = await uploadTask.whenComplete(() => null);
+
+        // Получение URL загруженного изображения
+        String downloadURL = await snapshot.ref.getDownloadURL();
+
+        // Обновление photoURL в Firebase Auth
+        await FirebaseAuth.instance.currentUser?.updatePhotoURL(downloadURL);
+
+        // Обновление URL в Firestore, если необходимо
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({'photoURL': downloadURL});
+
+        // Обновление UI
+        setState(() {
+          _userImageUrl = downloadURL;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Фото профиля успешно обновлено!')),
+        );
+      } catch (error) {
+        print("Ошибка при загрузке фото: $error");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка при загрузке фото: $error')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Выбор изображения отменен')),
+      );
+    }
   }
 
   @override
