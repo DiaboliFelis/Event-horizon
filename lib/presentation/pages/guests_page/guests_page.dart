@@ -20,6 +20,7 @@ class guestListScreenState extends State<guestListScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final List<String> guests = [];
+  final Map<String, String> userLogins = {};
   String currentUserId = '';
 
   void _loadGuests() async {
@@ -48,11 +49,24 @@ class guestListScreenState extends State<guestListScreen> {
     _getCurrentUserId();
   }
 
+  Future<void> _loadUserLogins() async {
+    for (final userId in guests) {
+      if (!userLogins.containsKey(userId)) {
+        final userDoc = await _firestore.collection('users').doc(userId).get();
+        if (userDoc.exists) {
+          final login = userDoc.data()?['login'] as String? ?? 'Без логина';
+          setState(() {
+            userLogins[userId] = login;
+          });
+        }
+      }
+    }
+  }
+
   Future<void> _addGuestByLogin(String login) async {
     if (login.isEmpty) return;
 
     try {
-      // Ищем пользователя по логину (email)
       final query = await _firestore
           .collection('users')
           .where('login', isEqualTo: login)
@@ -75,7 +89,6 @@ class guestListScreenState extends State<guestListScreen> {
         return;
       }
 
-      // Добавляем в список гостей
       setState(() {
         guests.add(guestUserId);
       });
@@ -199,6 +212,9 @@ class guestListScreenState extends State<guestListScreen> {
                 child: ListView.builder(
                   itemCount: guests.length,
                   itemBuilder: (context, index) {
+                    final guestID = guests[index];
+                    final login = userLogins[guestID] ?? "Ошибка";
+
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: ListTile(
@@ -207,7 +223,7 @@ class guestListScreenState extends State<guestListScreen> {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
                               child:
-                                Text(guests[index], style: const TextStyle(color: Colors.white),
+                                Text(login, style: const TextStyle(color: Colors.white),
                               ),
                           ),
                         ),
