@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
 
 class Menu extends StatelessWidget {
   const Menu({Key? key}) : super(key: key);
@@ -9,7 +11,13 @@ class Menu extends StatelessWidget {
     return const Scaffold(
       backgroundColor: Color(0xFFD8ECFF),
       appBar: CustomAppBar(),
-      body: CustomBody(),
+      resizeToAvoidBottomInset: true, //  Убедись, что это значение true
+      body: SafeArea(
+        // Оборачиваем тело в SafeArea
+        child: SingleChildScrollView(
+          child: CustomBody(),
+        ),
+      ),
     );
   }
 }
@@ -29,8 +37,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(15.0);
 }
 
-class CustomBody extends StatelessWidget {
+class CustomBody extends StatefulWidget {
+  // Изменили на StatefulWidget
   const CustomBody({Key? key}) : super(key: key);
+
+  @override
+  State<CustomBody> createState() => _CustomBodyState();
+}
+
+class _CustomBodyState extends State<CustomBody> {
+  String _searchText = ''; // Добавили состояние для хранения текста поиска
 
   @override
   Widget build(BuildContext context) {
@@ -44,30 +60,21 @@ class CustomBody extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Действие для поиска мероприятия
-                  },
-                  icon: const Icon(
-                    Icons.search,
-                    size: 30,
-                    color: Colors.white,
-                  ),
-                  label: const Text(
-                    'Найти мероприятие',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        const Color(0xFF4F81A3), // Цвет кнопки поиска
-                    shape: RoundedRectangleBorder(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Поиск мероприятия',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
+                  onChanged: (text) {
+                    setState(() {
+                      _searchText = text;
+                    });
+                  },
                 ),
               ),
               const SizedBox(width: 10), // Промежуток между кнопками
@@ -117,44 +124,84 @@ class CustomBody extends StatelessWidget {
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('events')
-                        .orderBy('eventDate',
-                            descending: false) // Сортировка по возрастанию даты
+                        .where('userId',
+                            isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                         .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasError) {
+                        print(
+                            "Ошибка StreamBuilder: ${snapshot.error}"); // ВАЖНО: Логируем ошибку
+                        return Center(
+                            child: Text(
+                                'Ошибка загрузки данных: ${snapshot.error}')); // Показываем ошибку на экране
+                      }
+
+                      if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
+                      // <-  Получаем _ВСЕ_ документы из Firestore:
+                      final events = snapshot.data!.docs;
+
+                      // Фильтрация данных
+                      final filteredEvents = events.where((event) {
+                        final title =
+                            event['eventName']?.toString().toLowerCase() ?? '';
+                        final query = _searchText.toLowerCase();
+                        return title.contains(query);
+                      }).toList();
+
                       return ListView.builder(
-                        itemCount: snapshot.data!.docs.length,
+                        itemCount: filteredEvents.length,
                         itemBuilder: (context, index) {
                           final document = snapshot.data!.docs[index];
                           final eventName = document['eventName'] as String? ??
                               'Без названия';
                           final eventDate = document['eventDate'] as String? ??
                               'Дата не указана'; // Получаем дату
+                          final documentId = document.id;
 
-                          return Container(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  eventName, // Название мероприятия из Firebase
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                          return ElevatedButton(
+                            // Use ElevatedButton instead of Container
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.all(8.0),
+                              backgroundColor: Colors
+                                  .transparent, // Make button background transparent
+                              shadowColor: Colors.transparent, // Remove shadow
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      EventInfoScreen(documentId: documentId),
                                 ),
-                                Text(
-                                  eventDate, // Дата мероприятия из Firebase
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    eventName, // Название мероприятия из Firebase
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    eventDate, // Дата мероприятия из Firebase
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
