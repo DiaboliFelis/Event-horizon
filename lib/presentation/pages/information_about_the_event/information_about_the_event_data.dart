@@ -20,6 +20,7 @@ class InfAboutTheEventLoadSuccess extends InformationAboutTheEventState {
 
 class EventData {
   final String? eventName;
+  final String? eventDescription;
   final String? eventType;
   final String? eventDate;
   final String? eventTime;
@@ -27,6 +28,7 @@ class EventData {
 
   EventData({
     required this.eventName,
+    required this.eventDescription,
     required this.eventType,
     required this.eventDate,
     required this.eventTime,
@@ -40,6 +42,7 @@ class EventCubit extends Cubit<InformationAboutTheEventState> {
   Future<void> onPageOpened(String documentId) async {
     final emptyData = EventData(
         eventName: null,
+        eventDescription: null,
         eventType: null,
         eventDate: null,
         eventTime: null,
@@ -72,9 +75,10 @@ class EventCubit extends Cubit<InformationAboutTheEventState> {
         final data = doc.data() as Map<String, dynamic>;
         final eventdata = EventData(
             eventName: data['eventName'],
+            eventDescription: data['eventDescription'],
             eventType: data['eventType'],
-            eventDate: data['eventTime'],
-            eventTime: data['eventDate'],
+            eventDate: data['eventDate'],
+            eventTime: data['eventTime'],
             eventAddress: data['eventAddress']);
 
 //Передаём состояние и данные на страницу

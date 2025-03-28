@@ -4,6 +4,7 @@ import 'package:event_horizon/presentation/pages/information_about_the_event/inf
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart'; // Для форматирования даты и времени
+import 'package:event_horizon/presentation/pages/information_about_the_event/EventDetailsDialog.dart';
 
 class EventInfoScreen extends StatelessWidget {
   final String documentId; // Получаем documentId через конструктор
@@ -69,6 +70,34 @@ class EventInfoScreen extends StatelessWidget {
         ),
       );
     }
+
+    Widget _buildDescriptionButton(
+        {required String? description, required BuildContext context}) {
+      return ElevatedButton(
+        onPressed: () {
+          if (description != null) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return EventDetailsDialog(description: description);
+              },
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color.fromRGBO(29, 143, 219, 0.624),
+          foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        ),
+        child: const Text(
+          'Показать описание', // Или любое другое название кнопки
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    }
     //Функция для создания закругленного контейнера с заголовком
 
     Widget _buildRoundedTitle(String title, Size size) {
@@ -77,7 +106,7 @@ class EventInfoScreen extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              fontSize: 30,
+              fontSize: 25,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -113,7 +142,13 @@ class EventInfoScreen extends StatelessWidget {
                     _buildRoundedTitle(
                         successState.eventdata.eventName ?? 'Нет названия',
                         const Size(351, 60)),
-                    SizedBox(height: 220),
+                    SizedBox(height: 180),
+                    _buildDescriptionButton(
+                      context: context,
+                      description: successState.eventdata.eventDescription ??
+                          'Нет дополнительной информации',
+                    ),
+                    SizedBox(height: 16),
                     _buildRoundedTextFormField(
                         initialValue:
                             successState.eventdata.eventType ?? 'Нет типа'),
