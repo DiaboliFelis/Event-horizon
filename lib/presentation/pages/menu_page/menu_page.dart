@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
+import 'package:intl/intl.dart';
 
 class Menu extends StatelessWidget {
   const Menu({Key? key}) : super(key: key);
@@ -43,6 +44,35 @@ class CustomBody extends StatefulWidget {
 
   @override
   State<CustomBody> createState() => _CustomBodyState();
+}
+
+// Функция для определения, прошло ли мероприятие
+bool isEventPassed(String eventDateString, String eventTimeString) {
+  try {
+    final dateFormat = DateFormat('dd.MM.yyyy');
+    final timeFormat = DateFormat('HH:mm');
+
+    final eventDate = dateFormat.parse(eventDateString);
+    final eventTime = timeFormat.parse(eventTimeString);
+
+    final eventDateTime = DateTime(
+      eventDate.year,
+      eventDate.month,
+      eventDate.day,
+      eventTime.hour,
+      eventTime.minute,
+    );
+
+    print('eventDateTime: ${eventDateTime.toLocal()}');
+    print('now: ${DateTime.now().toLocal()}');
+    bool isAfter = eventDateTime.isAfter(DateTime.now());
+    print('isAfter: $isAfter');
+
+    return isAfter;
+  } catch (e) {
+    print('Ошибка при парсинге даты и времени: $e');
+    return false;
+  }
 }
 
 class _CustomBodyState extends State<CustomBody> {
@@ -142,20 +172,31 @@ class _CustomBodyState extends State<CustomBody> {
                       }
 
                       // <-  Получаем _ВСЕ_ документы из Firestore:
-                      final events = snapshot.data!.docs;
+                      final allEvents = snapshot.data!.docs;
 
-                      // Фильтрация данных
-                      final filteredEvents = events.where((event) {
-                        final title =
-                            event['eventName']?.toString().toLowerCase() ?? '';
+                      // Отфильтровываем мероприятия по поиску и по дате
+                      final filteredEvents = allEvents.where((event) {
+                        final eventData = event.data() as Map<String, dynamic>;
+                        final title = (eventData['eventName']?.toString() ?? '')
+                            .toLowerCase();
                         final query = _searchText.toLowerCase();
-                        return title.contains(query);
+                        final eventDate =
+                            eventData['eventDate'] as String? ?? '';
+                        final eventTime =
+                            eventData['eventTime'] as String? ?? '';
+
+                        // Проверяем и поиск, и дату
+                        return title.contains(query) &&
+                            (eventDate.isNotEmpty && eventTime.isNotEmpty
+                                ? isEventPassed(
+                                    eventDate, eventTime) // Проверяем дату
+                                : false); // Если даты нет, не показываем
                       }).toList();
 
                       return ListView.builder(
                         itemCount: filteredEvents.length,
                         itemBuilder: (context, index) {
-                          final document = snapshot.data!.docs[index];
+                          final document = filteredEvents[index];
                           final eventName = document['eventName'] as String? ??
                               'Без названия';
                           final eventDate = document['eventDate'] as String? ??
