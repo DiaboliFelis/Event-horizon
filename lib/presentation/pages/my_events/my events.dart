@@ -31,11 +31,12 @@ class MyEventsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: const Color(0xFFD8ECFF),
         title: const Text('Мои мероприятия'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: const Icon(Icons.question_mark),
             onPressed: () {
               _showOptionsDialog(context);
             },
