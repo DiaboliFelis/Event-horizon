@@ -6,12 +6,41 @@ import 'package:event_horizon/presentation/pages/information_about_the_event/inf
 class MyEventsPage extends StatelessWidget {
   const MyEventsPage({Key? key}) : super(key: key);
 
+  void _showOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Дополнительно"),
+          content: const Text(
+              "Для того, чтобы удалить мероприятие, смахните его влево"),
+          actions: [
+            TextButton(
+              child: const Text("Закрыть"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Закрываем диалог
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFD8ECFF),
         title: const Text('Мои мероприятия'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              _showOptionsDialog(context);
+            },
+          ),
+        ],
       ),
       body: MyEvents(),
     );
@@ -127,18 +156,30 @@ class EventListItem extends StatelessWidget {
       },
       child: Card(
         margin: const EdgeInsets.all(8.0),
-        child: ListTile(
-          title: Text(eventName),
-          trailing: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EventInfoScreen(documentId: documentId),
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EventInfoScreen(documentId: documentId),
+              ),
+            );
+          },
+          child: Padding(
+            // Используем Padding для создания отступов внутри InkWell
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  eventName,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-              );
-            },
+                const Icon(
+                    Icons.arrow_forward_ios), // Иконка для визуального указания
+              ],
+            ),
           ),
         ),
       ),
