@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:event_horizon/presentation/pages/registration_page/registration_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:event_horizon/presentation/pages/registration_page/registration_page1.dart';
-import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -164,11 +162,40 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: Text("Удалить аккаунт"),
                 onTap: () {
                   Navigator.pop(context);
-                  _deleteAccount(context);
+                  _confirmDeleteAccount(context);
                 },
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  // Подтверждение удаления аккаунта
+  void _confirmDeleteAccount(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Подтверждение удаления"),
+          content: Text(
+              "Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить."),
+          actions: [
+            TextButton(
+              child: Text("Отмена"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Удалить"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteAccount(context);
+              },
+            ),
+          ],
         );
       },
     );
@@ -197,10 +224,14 @@ class _ProfilePageState extends State<ProfilePage> {
         // Удаляем аккаунт
         await user.delete();
 
-        // Переход на страницу регистрации
-        Navigator.pushReplacement(
-          context,
+        // Очистка shared_preferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.clear();
+
+        // Очистка стека и переход на экран входа
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => RegistrationPage()),
+          (route) => false, // Это удалит все предыдущие экраны из стека
         );
       }
     } catch (e) {
@@ -210,7 +241,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-// Выбор фото из галереи и загрузка на Firebase Storage
+  // Выбор фото из галереи и загрузка на Firebase Storage
   Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -344,8 +375,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: ClipOval(
                         child: _imageFile != null
                             ? Image.file(
-                                //Изменяем на Image.file
-                                _imageFile!, //Передаем File
+                                _imageFile!,
                                 width: 250,
                                 height: 250,
                                 fit: BoxFit.cover,
@@ -359,7 +389,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 },
                               )
                             : Image.asset(
-                                'assets/account_icon.png', // Путь для иконки
+                                'assets/account_icon.png',
                                 width: 250,
                                 height: 250,
                                 fit: BoxFit.cover,
@@ -373,7 +403,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         textAlign: TextAlign.center,
                         readOnly: true,
                         decoration: InputDecoration(
-                          hintText: _userLogin, //  Имя пользователя
+                          hintText: _userLogin,
                           hintStyle: TextStyle(
                             color: Color.fromARGB(179, 15, 14, 14),
                             fontSize: 25,
