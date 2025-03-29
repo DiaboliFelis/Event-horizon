@@ -133,6 +133,11 @@ class _ProfilePageState extends State<ProfilePage> {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
+    if (image == null) {
+      print('Выбор изображения отменен');
+      return;
+    }
+
     if (image != null) {
       File imageFile = File(image.path);
 
@@ -157,29 +162,31 @@ class _ProfilePageState extends State<ProfilePage> {
           print("fileName корректен: $fileName");
         }
 
-        try {
-          // Загрузка файла в Firebase Storage
-          Reference storageRef =
-              FirebaseStorage.instance.ref().child('profile_images/$fileName');
-          UploadTask uploadTask = storageRef.putFile(imageFile);
-          TaskSnapshot snapshot = await uploadTask;
+        //       try {
+        // Загрузка файла в Firebase Storage
+        //String fileName = 'profile_image_$userId.jpg';
+        print("File name being used: $fileName"); // Добавь эту строку
+        Reference storageRef =
+            FirebaseStorage.instance.ref().child('profile_images/$fileName');
+        print("Storage ref path: ${storageRef.fullPath}");
+        UploadTask uploadTask = storageRef.putFile(imageFile);
+        TaskSnapshot snapshot = await uploadTask;
 
-          if (snapshot.state == TaskState.success) {
-            String downloadURL = await snapshot.ref.getDownloadURL();
-            print("Изображение успешно загружено: $downloadURL");
+        if (snapshot.state == TaskState.success) {
+          String downloadURL = await snapshot.ref.getDownloadURL();
+          print("Изображение успешно загружено: $downloadURL");
 
-            // Обновление photoURL в Firebase Auth
-            await FirebaseAuth.instance.currentUser
-                ?.updatePhotoURL(downloadURL);
+          // Обновление photoURL в Firebase Auth
+          await FirebaseAuth.instance.currentUser?.updatePhotoURL(downloadURL);
 
-            // Обновление URL в Firestore
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(userId)
-                .update({'photoURL': downloadURL});
+          // Обновление URL в Firestore
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .update({'photoURL': downloadURL});
 
-            // Обновление UI
-            if (mounted) {
+          // Обновление UI
+          /*if (mounted) {
               setState(() {
                 _userImageUrl = downloadURL;
               });
@@ -202,11 +209,9 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       } else {
         print("Файл не найден");
+      }*/
+        }
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Выбор изображения отменен')),
-      );
     }
   }
 
