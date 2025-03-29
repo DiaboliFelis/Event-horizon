@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,6 +7,9 @@ import 'package:event_horizon/presentation/pages/registration_page/registration_
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:event_horizon/presentation/pages/registration_page/registration_page1.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -18,11 +22,33 @@ class _ProfilePageState extends State<ProfilePage> {
   String _userEmail = '';
   String _userImageUrl = '';
   String _userLogin = ''; //  Добавляем переменную для логина
+  File? _imageFile; // Изменяем тип на File?
+  OverlayEntry? _overlayEntry;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadImage();
+  }
+
+  Future<void> _loadImage() async {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      print("Пользователь не авторизован");
+      return;
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? imagePath = prefs
+        .getString('profile_image_path_$userId'); // Привязка к пользователю
+
+    if (imagePath != null) {
+      setState(() {
+        _imageFile = File(imagePath);
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -30,7 +56,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (user != null) {
       setState(() {
         _user = user;
-        _userImageUrl = user.photoURL ?? '';
       });
 
       //  Получаем данные пользователя из Firestore
@@ -51,6 +76,63 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      // Показываем индикатор загрузки
+      setState(() {
+        _isLoading = true;
+      });
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+
+      final Completer<void> completer = Completer<void>();
+
+      try {
+        final Directory appDir = await getApplicationDocumentsDirectory();
+        final String filePath = '${appDir.path}/profile_image.jpg';
+        final File newImage = File(image.path);
+        final File localImage = await newImage.copy(filePath);
+
+        setState(() {
+          _imageFile = localImage;
+        });
+        completer.complete(); // Завершаем Completer, если все прошло успешно
+      } catch (e) {
+        print("Ошибка при загрузке изображения: $e");
+        completer.completeError(e); // Завершаем Completer с ошибкой
+      } finally {
+        completer.future.then((_) {
+          // Выполняем после завершения Completer
+          if (mounted) {
+            Navigator.of(context).pop();
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        }).catchError((error) {
+          print("Ошибка после Completer: $error");
+          if (mounted) {
+            Navigator.of(context).pop();
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        });
+      }
+    }
+  }
+
   // Отображение диалогового окна
   void _showOptionsDialog(BuildContext context) {
     showDialog(
@@ -66,7 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 title: Text("Изменить фото"),
                 onTap: () {
                   Navigator.pop(context);
-                  _pickImageFromGallery(context);
+                  _pickImageFromGallery();
                 },
               ),
               ListTile(
@@ -129,90 +211,103 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
 // Выбор фото из галереи и загрузка на Firebase Storage
-  Future<void> _pickImageFromGallery(BuildContext context) async {
+  Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (image == null) {
-      print('Выбор изображения отменен');
+    if (image != null) {
+      File imageFile = File(image.path);
+      await _saveImageLocally(imageFile);
+    }
+  }
+
+  Future<void> _saveImageLocally(File newImage) async {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      _showOverlayMessage('Пользователь не найден.');
       return;
     }
 
-    if (image != null) {
-      File imageFile = File(image.path);
+    setState(() {
+      _isLoading = true;
+    });
 
-      // Проверка существования файла
-      if (await imageFile.exists()) {
-        String? userId = FirebaseAuth.instance.currentUser?.uid;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
 
-        if (userId == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Пользователь не найден.')),
-          );
-          return;
-        }
+    try {
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final String filePath =
+          '${appDir.path}/profile_image_$userId.jpg'; // Include userId in file name
+      final File localImage = await newImage.copy(filePath);
 
-        String fileName = 'profile_image_$userId.jpg';
+      setState(() {
+        _imageFile = localImage;
+      });
 
-// Проверка на наличие недопустимых символов
-        RegExp regExp = RegExp(r'^[a-zA-Z0-9_\.]+$');
-        if (!regExp.hasMatch(fileName)) {
-          print("fileName содержит недопустимые символы: $fileName");
-        } else {
-          print("fileName корректен: $fileName");
-        }
+// Сохраняем путь к изображению в shared_preferences (привязка к пользователю)
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('profile_image_path_$userId', localImage.path);
 
-        //       try {
-        // Загрузка файла в Firebase Storage
-        //String fileName = 'profile_image_$userId.jpg';
-        print("File name being used: $fileName"); // Добавь эту строку
-        Reference storageRef =
-            FirebaseStorage.instance.ref().child('profile_images/$fileName');
-        print("Storage ref path: ${storageRef.fullPath}");
-        UploadTask uploadTask = storageRef.putFile(imageFile);
-        TaskSnapshot snapshot = await uploadTask;
-
-        if (snapshot.state == TaskState.success) {
-          String downloadURL = await snapshot.ref.getDownloadURL();
-          print("Изображение успешно загружено: $downloadURL");
-
-          // Обновление photoURL в Firebase Auth
-          await FirebaseAuth.instance.currentUser?.updatePhotoURL(downloadURL);
-
-          // Обновление URL в Firestore
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userId)
-              .update({'photoURL': downloadURL});
-
-          // Обновление UI
-          /*if (mounted) {
-              setState(() {
-                _userImageUrl = downloadURL;
-              });
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Фото профиля успешно обновлено!')),
-              );
-            }
-          } else {
-            print("Ошибка при загрузке изображения: ${snapshot.state}");
-          }
-        } catch (error) {
-          print("Ошибка при загрузке фото: $error");
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Ошибка при загрузке фото: $error')),
-            );
-          }
-        }
-      } else {
-        print("Файл не найден");
-      }*/
-        }
-      }
+      _showOverlayMessage('Фото профиля успешно обновлено!');
+    } catch (e) {
+      print("Ошибка сохранения фото локально: $e");
+      _showOverlayMessage('Ошибка сохранения фото локально: $e');
+    } finally {
+      Navigator.of(context).pop();
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  void _showOverlayMessage(String message) async {
+    if (!mounted) {
+      print('Widget is no longer mounted, not showing overlay message');
+      return;
+    }
+
+    _overlayEntry?.remove();
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 50.0,
+        left: 20.0,
+        right: 20.0,
+        child: Material(
+          color: Colors.black54,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+
+    await Future.delayed(const Duration(seconds: 3));
+
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    super.dispose();
   }
 
   @override
@@ -247,9 +342,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         shape: BoxShape.circle,
                       ),
                       child: ClipOval(
-                        child: _userImageUrl.isNotEmpty
-                            ? Image.network(
-                                _userImageUrl,
+                        child: _imageFile != null
+                            ? Image.file(
+                                //Изменяем на Image.file
+                                _imageFile!, //Передаем File
                                 width: 250,
                                 height: 250,
                                 fit: BoxFit.cover,

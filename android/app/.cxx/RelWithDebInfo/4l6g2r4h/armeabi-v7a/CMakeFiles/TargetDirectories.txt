@@ -1,0 +1,2 @@
+C:/Users/USER/Desktop 1/Event-horizon/android/app/.cxx/RelWithDebInfo/4l6g2r4h/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/USER/Desktop 1/Event-horizon/android/app/.cxx/RelWithDebInfo/4l6g2r4h/armeabi-v7a/CMakeFiles/rebuild_cache.dir
