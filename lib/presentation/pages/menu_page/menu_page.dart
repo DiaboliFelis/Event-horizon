@@ -1,24 +1,151 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
 import 'package:intl/intl.dart';
+import 'package:event_horizon/presentation/pages/menu_page/cloud_widget.dart';
+import 'package:event_horizon/presentation/pages/menu_page/cloud_1_widget.dart';
 
 class Menu extends StatelessWidget {
   const Menu({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFFD8ECFF),
-      appBar: CustomAppBar(),
+    return Scaffold(
+      backgroundColor: const Color(0xFFD8ECFF),
+      appBar: const CustomAppBar(),
       resizeToAvoidBottomInset: true, //  Убедись, что это значение true
-      body: SafeArea(
-        // Оборачиваем тело в SafeArea
-        child: SingleChildScrollView(
-          child: CustomBody(),
-        ),
+      body: Stack(
+        // Используем Stack для наложения облаков на фон
+        children: [
+          CloudBackground(),
+          Cloud_1_Background(),
+          SafeArea(
+            child: CustomBody(),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class CloudBackground extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    const int cloudCountHorizontal = 1; // Количество облаков по горизонтали
+    const int cloudCountVertical = 2; // Количество облаков по вертикали
+
+    const double horizontalSpacingFactor =
+        0.2; // Увеличиваем горизонтальный отступ МЕЖДУ облаками
+    const double verticalSpacingFactor =
+        0.0001; // Увеличиваем вертикальный отступ МЕЖДУ облаками
+
+    // Вычисляем ширину области, занимаемой облаками
+    final double totalCloudAreaWidth = screenWidth /
+        (1 +
+            (cloudCountHorizontal - 1) *
+                (horizontalSpacingFactor - 1) /
+                cloudCountHorizontal);
+    final double totalCloudAreaHeight = screenHeight /
+        (1 +
+            (cloudCountVertical - 1) *
+                (verticalSpacingFactor - 1) /
+                cloudCountVertical);
+
+    // Вычисляем отступы внутри этой области
+    final double horizontalSpacing =
+        totalCloudAreaWidth / (cloudCountHorizontal + 1);
+    final double verticalSpacing =
+        totalCloudAreaHeight / (cloudCountVertical + 1);
+
+    //  Вычисляем смещение, чтобы центрировать область с облаками
+    final double horizontalOffset = (screenWidth - totalCloudAreaWidth) / 1;
+    final double verticalOffset = (screenHeight - totalCloudAreaHeight) / 1.5;
+
+    return Stack(
+      children: [
+        ...List.generate(
+          cloudCountHorizontal * cloudCountVertical,
+          (index) {
+            final int row = index ~/ cloudCountHorizontal; // Номер строки
+            final int col = index % cloudCountHorizontal; // Номер столбца
+
+            final double x = horizontalOffset +
+                horizontalSpacing * (col + 0.1); // Добавляем смещение
+            final double y = verticalOffset +
+                verticalSpacing * (row + 1.1); // Добавляем смещение
+
+            return CloudWidget(
+              x: x,
+              y: y,
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class Cloud_1_Background extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    const int cloudCountHorizontal = 1; // Количество облаков по горизонтали
+    const int cloudCountVertical = 2; // Количество облаков по вертикали
+
+    const double horizontalSpacingFactor =
+        0.2; // Увеличиваем горизонтальный отступ МЕЖДУ облаками
+    const double verticalSpacingFactor =
+        0.0001; // Увеличиваем вертикальный отступ МЕЖДУ облаками
+
+    // Вычисляем ширину области, занимаемой облаками
+    final double totalCloudAreaWidth = screenWidth /
+        (1 +
+            (cloudCountHorizontal - 1) *
+                (horizontalSpacingFactor - 1) /
+                cloudCountHorizontal);
+    final double totalCloudAreaHeight = screenHeight /
+        (1 +
+            (cloudCountVertical - 1) *
+                (verticalSpacingFactor - 1) /
+                cloudCountVertical);
+
+    // Вычисляем отступы внутри этой области
+    final double horizontalSpacing =
+        totalCloudAreaWidth / (cloudCountHorizontal + 1);
+    final double verticalSpacing =
+        totalCloudAreaHeight / (cloudCountVertical + 1);
+
+    //  Вычисляем смещение, чтобы центрировать область с облаками
+    final double horizontalOffset = (screenWidth - totalCloudAreaWidth) / 1;
+    final double verticalOffset = (screenHeight - totalCloudAreaHeight) / 1.5;
+
+    return Stack(
+      children: [
+        ...List.generate(
+          cloudCountHorizontal * cloudCountVertical,
+          (index) {
+            final int row = index ~/ cloudCountHorizontal; // Номер строки
+            final int col = index % cloudCountHorizontal; // Номер столбца
+
+            final double x = horizontalOffset +
+                horizontalSpacing * (col + 1.2); // Добавляем смещение
+            final double y = verticalOffset +
+                verticalSpacing * (row + 0.95); // Добавляем смещение
+
+            return Cloud_1_Widget(
+              x: x,
+              y: y,
+            );
+          },
+        ),
+      ],
     );
   }
 }

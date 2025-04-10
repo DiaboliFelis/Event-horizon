@@ -103,6 +103,8 @@ flutter:
       fonts:
         - asset: assets/Comic_Sans_MS.ttf
         - asset: assets/account_icon.png
+        - asset: assets/cloud.png
+        - asset: assets/cloud_1.png
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
