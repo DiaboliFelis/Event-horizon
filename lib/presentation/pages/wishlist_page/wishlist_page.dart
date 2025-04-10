@@ -12,9 +12,35 @@ class WishlistListScreen extends StatefulWidget {
 }
 
 class wishlistListScreenState extends State<WishlistListScreen> {
-  final List<String> wishlist = [];
+  List<String> wishlist = [];
 
-  void _addWish(String name) async {
+  @override
+  void initState() {
+    super.initState();
+    _loadWish(); // Загрузка данных при инициализации виджета
+  }
+
+  Future<void> _loadWish() async {
+    // 1. Получаем ссылку на коллекцию "food" для конкретного мероприятия
+    final foodCollection = FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.documentId)
+        .collection('Wishlist');
+
+    // 2. Получаем все документы из коллекции
+    final snapshot = await foodCollection.get();
+
+    // 3. Преобразуем документы в список названий блюд
+    List<String> loadedWish =
+        snapshot.docs.map((doc) => doc['name'] as String).toList();
+
+    // 4. Обновляем состояние виджета
+    setState(() {
+      wishlist = loadedWish;
+    });
+  }
+
+  Future<void> _addWish(String name) async {
     if (name.isNotEmpty) {
       // 1. Получаем ссылку на коллекцию "food" для конкретного мероприятия
       final WishCollection = FirebaseFirestore.instance
@@ -27,9 +53,7 @@ class wishlistListScreenState extends State<WishlistListScreen> {
       await WishCollection.add({'name': name});
 
       // 3. Обновляем локальное состояние (если нужно)
-      setState(() {
-        wishlist.add(name);
-      });
+      _loadWish();
     }
   }
 
