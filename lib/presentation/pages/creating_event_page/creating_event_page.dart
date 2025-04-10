@@ -183,7 +183,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
 
           Navigator.pushNamed(
             context,
-            '/eventInfo',
+            '/menu',
             arguments: {'documentId': documentId},
           );
         } else {
