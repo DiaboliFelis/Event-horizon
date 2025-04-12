@@ -320,6 +320,26 @@ class _CustomBodyState extends State<CustomBody> {
                                 : false); // Если даты нет, не показываем
                       }).toList();
 
+                      if (filteredEvents.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/catcloud.png', // Путь к картинке котика
+                                width: 100,
+                                height: 100,
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Нет предстоящих мероприятий',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
                       return ListView.builder(
                         itemCount: filteredEvents.length,
                         itemBuilder: (context, index) {
