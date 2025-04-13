@@ -106,6 +106,7 @@ flutter:
         - asset: assets/cloud.png
         - asset: assets/cloud_1.png
         - asset: assets/catcloud.png
+        - asset: assets/the_cat_is_lying.png
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

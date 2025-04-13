@@ -119,7 +119,13 @@ class EventInfoScreen extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color(0xFFD0E4F7),
-        title: const Text('Мероприятие'),
+        title: const Text(
+          'Мероприятие',
+          style: TextStyle(
+            color: Color.fromARGB(
+                255, 76, 71, 71), // Замените Colors.black на желаемый цвет
+          ),
+        ),
       ),
       backgroundColor: const Color(0xFFD0E4F7),
       body: BlocProvider<EventCubit>(
@@ -141,8 +147,13 @@ class EventInfoScreen extends StatelessWidget {
                   children: [
                     _buildRoundedTitle(
                         successState.eventdata.eventName ?? 'Нет названия',
-                        const Size(351, 60)),
-                    SizedBox(height: 180),
+                        const Size(340, 60)),
+                    SizedBox(height: 100),
+                    Image.asset(
+                      'assets/the_cat_is_lying.png', // Путь к картинке котика
+                      width: 100,
+                      height: 100,
+                    ),
                     _buildDescriptionButton(
                       context: context,
                       description: successState.eventdata.eventDescription ??

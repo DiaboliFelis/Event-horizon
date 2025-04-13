@@ -75,9 +75,9 @@ class CloudBackground extends StatelessWidget {
             final int col = index % cloudCountHorizontal; // Номер столбца
 
             final double x = horizontalOffset +
-                horizontalSpacing * (col + 0.1); // Добавляем смещение
+                horizontalSpacing * (col + 0.03); // Добавляем смещение
             final double y = verticalOffset +
-                verticalSpacing * (row + 1.1); // Добавляем смещение
+                verticalSpacing * (row + 1.09); // Добавляем смещение
 
             return CloudWidget(
               x: x,
@@ -100,7 +100,7 @@ class Cloud_1_Background extends StatelessWidget {
     const int cloudCountVertical = 2; // Количество облаков по вертикали
 
     const double horizontalSpacingFactor =
-        0.2; // Увеличиваем горизонтальный отступ МЕЖДУ облаками
+        0.1; // Увеличиваем горизонтальный отступ МЕЖДУ облаками
     const double verticalSpacingFactor =
         0.0001; // Увеличиваем вертикальный отступ МЕЖДУ облаками
 
@@ -123,7 +123,7 @@ class Cloud_1_Background extends StatelessWidget {
         totalCloudAreaHeight / (cloudCountVertical + 1);
 
     //  Вычисляем смещение, чтобы центрировать область с облаками
-    final double horizontalOffset = (screenWidth - totalCloudAreaWidth) / 1;
+    final double horizontalOffset = (screenWidth - totalCloudAreaWidth) / 1.5;
     final double verticalOffset = (screenHeight - totalCloudAreaHeight) / 1.5;
 
     return Stack(
@@ -137,7 +137,7 @@ class Cloud_1_Background extends StatelessWidget {
             final double x = horizontalOffset +
                 horizontalSpacing * (col + 1.2); // Добавляем смещение
             final double y = verticalOffset +
-                verticalSpacing * (row + 0.95); // Добавляем смещение
+                verticalSpacing * (row + 0.98); // Добавляем смещение
 
             return Cloud_1_Widget(
               x: x,
@@ -332,7 +332,7 @@ class _CustomBodyState extends State<CustomBody> {
                               ),
                               const SizedBox(height: 8),
                               const Text(
-                                'Нет предстоящих мероприятий',
+                                'Нет мероприятий',
                                 style: TextStyle(fontSize: 16),
                               ),
                             ],
