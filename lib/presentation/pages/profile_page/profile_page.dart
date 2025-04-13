@@ -212,35 +212,30 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Удаление аккаунта
   Future<void> _deleteAccount(BuildContext context) async {
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        // Удаляем данные пользователя из Firestore
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .delete();
+  // Сохраняем ScaffoldMessenger ДО всех асинхронных операций
+  final scaffold = ScaffoldMessenger.of(context);
+  final navigator = Navigator.of(context);
 
-        // Удаляем аккаунт
-        await user.delete();
+  try {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-        // Очистка shared_preferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.clear();
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).delete();
+    await user.delete();
+    await SharedPreferences.getInstance().then((prefs) => prefs.clear());
 
-        // Очистка стека и переход на экран входа
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => RegistrationPage()),
-          (route) => false, // Это удалит все предыдущие экраны из стека
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Не удалось удалить аккаунт: $e')),
-      );
-    }
+    // Навигация
+    navigator.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => RegistrationPage()),
+      (route) => false,
+    );
+
+  } catch (e) {
+    scaffold.showSnackBar(
+      SnackBar(content: Text("Ошибка: ${e.toString()}")),
+    );
   }
-
+}
   // Выбор фото из галереи и загрузка на Firebase Storage
   Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
