@@ -37,12 +37,17 @@ class RegistrationScreen extends StatelessWidget {
         password: password,
       );
     } on FirebaseAuthException catch (e) {
+      print('Firebase error code: ${e.code}');
       String errorMessage = 'Произошла ошибка. Пожалуйста, попробуйте снова.';
-      if (e.code == 'wrong-password') {
+
+      if (e.code == 'invalid-email') {
+        errorMessage = 'Неверный формат email.';
+      } else if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
         errorMessage = 'Неверный пароль.';
       } else if (e.code == 'user-not-found') {
         errorMessage = 'Пользователь не найден.';
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );

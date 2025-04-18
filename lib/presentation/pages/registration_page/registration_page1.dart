@@ -12,48 +12,47 @@ Future<void> CreateUserWithLoginEmailAndPassword({
   required BuildContext context,
 }) async {
   try {
-    // Создание пользователя с email и паролем
     UserCredential userCredential =
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
 
-    // Сохраняем логин и email в Firestore после регистрации
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userCredential.user!.uid)
-        .set({
-      'login': login,
-      'email': email,
-      'name': '', // Имя, которое пользователь может изменить позже
-    });
+    if (userCredential.user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'login': login,
+        'email': email,
+        'name': '',
+      });
 
-    // Уведомление о успешной регистрации
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Пользователь зарегистрирован успешно!')),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Пользователь зарегистрирован успешно!')),
+      );
 
-    // Переход на страницу профиля после регистрации
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => ProfilePage()));
+      if (context.mounted) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => ProfilePage()));
+      }
+    }
   } on FirebaseAuthException catch (e) {
-    // Обработка ошибок регистрации
     String errorMessage = 'Произошла ошибка. Пожалуйста, повторите позднее.';
     if (e.code == 'weak-password') {
       errorMessage = 'Слишком простой пароль.';
     } else if (e.code == 'email-already-in-use') {
       errorMessage = 'Аккаунт с такой почтой уже существует.';
+    } else if (e.code == 'invalid-email') {
+      errorMessage = 'Неверный формат email.';
     }
 
-    // Отображение ошибки пользователю
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(errorMessage)),
     );
   } catch (e) {
-    // Обработка неожиданной ошибки
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Неожиданная ошибка.')),
+      const SnackBar(content: Text('Неожиданная ошибка.')),
     );
   }
 }
