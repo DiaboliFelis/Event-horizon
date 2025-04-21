@@ -30,6 +30,7 @@ class guestListScreenState extends State<guestListScreen> {
         guests.clear();
         guests.addAll(List<String>.from(doc.data()?['guests'] ?? []));
       });
+      _loadUserLogins();
     }
   }
 
@@ -93,14 +94,32 @@ class guestListScreenState extends State<guestListScreen> {
         guests.add(guestUserId);
       });
 
-      // Обновляем данные в Firestore
       await _firestore.collection('user_guests').doc(currentUserId).set({
         'guests': FieldValue.arrayUnion([guestUserId]),
       }, SetOptions(merge: true));
 
+      // Загружаем логин нового гостя
+      final newUserDoc = await _firestore.collection('users').doc(guestUserId).get();
+      if (newUserDoc.exists) {
+        setState(() {
+          userLogins[guestUserId] = newUserDoc.data()?['login'] ?? login;
+        });
+      }
+
     } catch (e) {
       _showErrorDialog('Ошибка при добавлении гостя: ${e.toString()}');
     }
+  }
+
+  Future<void> _removeGuest(String userId) async {
+    setState(() {
+      guests.remove(userId);
+      userLogins.remove(userId);
+    });
+
+    await _firestore.collection('user_guests').doc(currentUserId).update({
+      'guests': FieldValue.arrayRemove([userId]),
+    });
   }
 
   void _showErrorDialog(String message) {
@@ -184,24 +203,26 @@ class guestListScreenState extends State<guestListScreen> {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color(0xFFD0E4F7),
-        title: SizedBox
-        ( 
+        title: SizedBox(
           width: 200,
           height: 60,
-        child: Card
-          (
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-          color: const Color(0x993C3C43),
-          child: const Padding
-            (
-            padding: EdgeInsets.all(0) ,
-            child: Center
-            (
-            child: Text('Список гостей', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))
+          child: Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+            color: const Color(0x993C3C43),
+            child: const Padding(
+              padding: EdgeInsets.all(0),
+              child: Center(
+                child: Text('Список гостей', 
+                  style: TextStyle(
+                    color: Colors.white, 
+                    fontSize: 20, 
+                    fontWeight: FontWeight.bold
+                  )
+                ),
+              ),
             ),
           ),
         ),
-      ),
       ),
       body: Center(
         child: Padding(
@@ -213,18 +234,35 @@ class guestListScreenState extends State<guestListScreen> {
                   itemCount: guests.length,
                   itemBuilder: (context, index) {
                     final guestID = guests[index];
-                    final login = userLogins[guestID] ?? "Ошибка";
+                    final login = userLogins[guestID] ?? "Загрузка...";
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Dismissible(
+                        key: Key(guestID),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.only(right: 20),
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
+                        onDismissed: (direction) {
+                          _removeGuest(guestID);
+                        },
                         child: ListTile(
                           title: Card(
                             color: const Color(0xA64F81A3),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                              child:
-                                Text(login, style: const TextStyle(color: Colors.white),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 15.0, 
+                                horizontal: 10
                               ),
+                              child: Text(
+                                login, 
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -240,7 +278,7 @@ class guestListScreenState extends State<guestListScreen> {
         backgroundColor: const Color(0x993C3C43),
         onPressed: _showAddGuestDialog,
         tooltip: 'Добавить гостя',
-        child: const Icon(Icons.person_add_alt_outlined, color: Colors.white,),
+        child: const Icon(Icons.person_add_alt_outlined, color: Colors.white),
       ),
     );
   }
