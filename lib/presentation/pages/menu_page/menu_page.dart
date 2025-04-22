@@ -281,7 +281,7 @@ class _CustomBodyState extends State<CustomBody> {
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('events')
-                        .where('userId',
+                        .where('userId',//userId
                             isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                         .snapshots(),
                     builder: (BuildContext context,

@@ -203,7 +203,11 @@ class EventInfoScreen extends StatelessWidget {
                         _buildRoundedButton(
                             context,
                             'Список гостей',
-                            () => Navigator.pushNamed(context, '/guest'),
+                            () => Navigator.pushNamed(
+                              context,
+                              '/guest',
+                              arguments: {'documentId': documentId},
+                              ),
                             const Color(0xFFD9D9D9),
                             const Size(160, 70)),
                       ],

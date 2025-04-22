@@ -361,7 +361,12 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                         _buildRoundedButton(
                             context,
                             'Список гостей',
-                            () => Navigator.pushNamed(context, '/guest'),
+                            () => Navigator.pushNamed(context, 
+                            '/guest', 
+                            arguments: {
+                                    'documentId': tempDocumentId
+                                  }, //  Передаем tempDocumentId
+                            ),
                             const Color(0xFFD9D9D9),
                             const Size(160, 60)),
                       ],

@@ -45,7 +45,15 @@ class Navigation {
           ),
         );
       case '/guest':
-        return MaterialPageRoute(builder: (context) => GuestsPage());
+        final args = settings.arguments as Map<String, dynamic>?;
+        final documentId =
+            args?['documentId'] as String?; //  Получаем documentId
+
+        return MaterialPageRoute(
+          builder: (context) => guestListScreen(
+            documentId: documentId ?? '', //  Используем documentId
+          ),
+        );
       case '/profile':
         return MaterialPageRoute(builder: (context) => ProfilePage());
       case '/my_event':

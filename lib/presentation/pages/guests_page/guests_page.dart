@@ -4,14 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class GuestsPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return guestListScreen();
-  }
-}
-
 class guestListScreen extends StatefulWidget {
+  final String documentId;
+
+  const guestListScreen({Key? key, required this.documentId}) : super(key: key);
   @override
   guestListScreenState createState() => guestListScreenState();
 }
@@ -24,7 +20,7 @@ class guestListScreenState extends State<guestListScreen> {
   String currentUserId = '';
 
   void _loadGuests() async {
-    final doc = await _firestore.collection('user_guests').doc(currentUserId).get();
+    final doc = await _firestore.collection('user_guests').doc(widget.documentId).get();
     if (doc.exists) {
       setState(() {
         guests.clear();
@@ -94,7 +90,7 @@ class guestListScreenState extends State<guestListScreen> {
         guests.add(guestUserId);
       });
 
-      await _firestore.collection('user_guests').doc(currentUserId).set({
+      await _firestore.collection('user_guests').doc(widget.documentId).set({
         'guests': FieldValue.arrayUnion([guestUserId]),
       }, SetOptions(merge: true));
 
@@ -117,7 +113,7 @@ class guestListScreenState extends State<guestListScreen> {
       userLogins.remove(userId);
     });
 
-    await _firestore.collection('user_guests').doc(currentUserId).update({
+    await _firestore.collection('user_guests').doc(widget.documentId).update({
       'guests': FieldValue.arrayRemove([userId]),
     });
   }
