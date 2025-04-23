@@ -1,33 +1,68 @@
 //Список гостей
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class guestListScreen extends StatefulWidget {
+class GuestsPage extends StatelessWidget {
   final String documentId;
+  final List<String> attendingUsers;
 
-  const guestListScreen({Key? key, required this.documentId}) : super(key: key);
+  const GuestsPage({
+    Key? key,
+    required this.documentId,
+    required this.attendingUsers,
+  }) : super(key: key);
+
   @override
-  guestListScreenState createState() => guestListScreenState();
+  Widget build(BuildContext context) {
+    return GuestListScreen(
+      documentId: documentId,
+      initialAttendingUsers: attendingUsers,
+    );
+  }
 }
 
-class guestListScreenState extends State<guestListScreen> {
+class GuestListScreen extends StatefulWidget {
+  final String documentId;
+  final List<String> initialAttendingUsers;
+
+  const GuestListScreen({
+    Key? key,
+    required this.documentId,
+    required this.initialAttendingUsers,
+  }) : super(key: key);
+
+  @override
+  GuestListScreenState createState() => GuestListScreenState();
+}
+
+class GuestListScreenState extends State<GuestListScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final List<String> guests = [];
-  final Map<String, String> userLogins = {};
   String currentUserId = '';
+  List<String> guests = [];
 
-  void _loadGuests() async {
-    final doc = await _firestore.collection('user_guests').doc(widget.documentId).get();
-    if (doc.exists) {
-      setState(() {
-        guests.clear();
-        guests.addAll(List<String>.from(doc.data()?['guests'] ?? []));
-      });
-      _loadUserLogins();
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadGuestsFromSharedPreferences();
+    _getCurrentUserId();
+  }
+
+  // Загрузка списка гостей из SharedPreferences
+  Future<void> _loadGuestsFromSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      guests = prefs.getStringList('guests_${widget.documentId}') ??
+          widget.initialAttendingUsers;
+    });
+  }
+
+  // Сохранение списка гостей в SharedPreferences
+  Future<void> _saveGuestsToSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('guests_${widget.documentId}', guests);
   }
 
   void _getCurrentUserId() {
@@ -36,27 +71,20 @@ class guestListScreenState extends State<guestListScreen> {
       setState(() {
         currentUserId = user.uid;
       });
-      _loadGuests();
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _getCurrentUserId();
-  }
-
-  Future<void> _loadUserLogins() async {
-    for (final userId in guests) {
-      if (!userLogins.containsKey(userId)) {
-        final userDoc = await _firestore.collection('users').doc(userId).get();
-        if (userDoc.exists) {
-          final login = userDoc.data()?['login'] as String? ?? 'Без логина';
-          setState(() {
-            userLogins[userId] = login;
-          });
-        }
+  // Получение логина пользователя по ID
+  Future<String> _getUserLogin(String userId) async {
+    try {
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        return userDoc.data()?['login'] as String? ?? 'Без логина';
+      } else {
+        return 'Пользователь не найден';
       }
+    } catch (e) {
+      return 'Ошибка загрузки';
     }
   }
 
@@ -75,7 +103,7 @@ class guestListScreenState extends State<guestListScreen> {
       }
 
       final guestUserId = query.docs.first.id;
-      
+
       if (guestUserId == currentUserId) {
         _showErrorDialog('Нельзя добавить самого себя');
         return;
@@ -86,105 +114,63 @@ class guestListScreenState extends State<guestListScreen> {
         return;
       }
 
+      // Добавляем пользователя в подколлекцию мероприятия
+      await _firestore
+          .collection('events')
+          .doc(widget.documentId)
+          .collection('attendingUsers')
+          .doc(guestUserId)
+          .set({'addedAt': FieldValue.serverTimestamp()});
+
+      print('Добавляем гостя в мероприятие с ID: ${widget.documentId}');
+
+      await _firestore.collection('events').doc(widget.documentId).update({
+        'attendingUsers': FieldValue.arrayUnion([guestUserId]),
+      });
+
       setState(() {
         guests.add(guestUserId);
       });
 
-      await _firestore.collection('user_guests').doc(widget.documentId).set({
-        'guests': FieldValue.arrayUnion([guestUserId]),
-      }, SetOptions(merge: true));
-
-      // Загружаем логин нового гостя
-      final newUserDoc = await _firestore.collection('users').doc(guestUserId).get();
-      if (newUserDoc.exists) {
-        setState(() {
-          userLogins[guestUserId] = newUserDoc.data()?['login'] ?? login;
-        });
-      }
-
+      await _saveGuestsToSharedPreferences();
     } catch (e) {
       _showErrorDialog('Ошибка при добавлении гостя: ${e.toString()}');
     }
   }
 
   Future<void> _removeGuest(String userId) async {
-    setState(() {
-      guests.remove(userId);
-      userLogins.remove(userId);
+    // Удаляем пользователя из подколлекции мероприятия
+    await _firestore
+        .collection('events')
+        .doc(widget.documentId)
+        .collection('attendingUsers')
+        .doc(userId)
+        .delete();
+
+    await _firestore.collection('events').doc(widget.documentId).update({
+      'attendingUsers': FieldValue.arrayRemove([userId]),
     });
 
-    await _firestore.collection('user_guests').doc(widget.documentId).update({
-      'guests': FieldValue.arrayRemove([userId]),
+    setState(() {
+      guests.remove(userId);
     });
+
+    await _saveGuestsToSharedPreferences();
   }
 
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Ошибка'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddGuestDialog() {
-    final TextEditingController controller = TextEditingController();
-
-    showDialog(
-      context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFFD0E4F7),
-          title: SizedBox(
-            width: 300,
-            height: 100,
-            child: Center(
-              child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50)),
-                color: const Color(0x993C3C43),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                  child: Text(
-                    'Добавить гостя',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          content: Card(
-            color: const Color(0xA64F81A3),
-            child: TextField(
-              controller: controller,
-              decoration:
-                  const InputDecoration(labelText: 'Введите логин гостя'),
-            ),
-          ),
+          title: const Text('Ошибка'),
+          content: Text(message),
           actions: [
             TextButton(
-              onPressed: () {
-                String login = controller.text.trim();
-                _addGuestByLogin(login);
-                Navigator.of(context).pop();
-              },
-              child: const Text('Добавить'),
-            ),
-            TextButton(
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Отмена'),
             ),
           ],
         );
@@ -203,18 +189,17 @@ class guestListScreenState extends State<guestListScreen> {
           width: 200,
           height: 60,
           child: Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(100)),
             color: const Color(0x993C3C43),
             child: const Padding(
               padding: EdgeInsets.all(0),
               child: Center(
-                child: Text('Список гостей', 
-                  style: TextStyle(
-                    color: Colors.white, 
-                    fontSize: 20, 
-                    fontWeight: FontWeight.bold
-                  )
-                ),
+                child: Text('Список гостей',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)),
               ),
             ),
           ),
@@ -230,7 +215,6 @@ class guestListScreenState extends State<guestListScreen> {
                   itemCount: guests.length,
                   itemBuilder: (context, index) {
                     final guestID = guests[index];
-                    final login = userLogins[guestID] ?? "Загрузка...";
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -240,26 +224,36 @@ class guestListScreenState extends State<guestListScreen> {
                         background: Container(
                           color: Colors.red,
                           alignment: Alignment.centerRight,
-                          padding: EdgeInsets.only(right: 20),
-                          child: Icon(Icons.delete, color: Colors.white),
+                          padding: const EdgeInsets.only(right: 20),
+                          child: const Icon(Icons.delete, color: Colors.white),
                         ),
                         onDismissed: (direction) {
                           _removeGuest(guestID);
                         },
-                        child: ListTile(
-                          title: Card(
-                            color: const Color(0xA64F81A3),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 15.0, 
-                                horizontal: 10
+                        child: FutureBuilder<String>(
+                          future: _getUserLogin(guestID),
+                          builder: (context, snapshot) {
+                            String login;
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              login = "Загрузка...";
+                            } else if (snapshot.hasError) {
+                              login = "Ошибка загрузки";
+                            } else {
+                              login = snapshot.data ?? "Без логина";
+                            }
+                            return Card(
+                              color: const Color(0xA64F81A3),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 15.0, horizontal: 10),
+                                child: Text(
+                                  login,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
                               ),
-                              child: Text(
-                                login, 
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                       ),
                     );
@@ -272,10 +266,48 @@ class guestListScreenState extends State<guestListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0x993C3C43),
-        onPressed: _showAddGuestDialog,
+        onPressed: () {
+          // Используем анонимную функцию
+          _showAddGuestDialog(context);
+        },
         tooltip: 'Добавить гостя',
         child: const Icon(Icons.person_add_alt_outlined, color: Colors.white),
       ),
+    );
+  }
+
+  // Диалоговое окно для добавления пользователя по логину
+  Future<void> _showAddGuestDialog(BuildContext context) async {
+    String login = '';
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Добавить пользователя по логину'),
+          content: TextField(
+            decoration: const InputDecoration(hintText: 'Введите логин'),
+            onChanged: (value) {
+              login = value;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Отмена'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _addGuestByLogin(login);
+              },
+              child: const Text('Добавить'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

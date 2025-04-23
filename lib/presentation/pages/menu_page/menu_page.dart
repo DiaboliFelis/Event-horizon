@@ -281,116 +281,145 @@ class _CustomBodyState extends State<CustomBody> {
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('events')
-                        .where('userId',//userId
+                        .where('userId',
                             isEqualTo: FirebaseAuth.instance.currentUser?.uid)
                         .snapshots(),
                     builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasError) {
-                        print(
-                            "Ошибка StreamBuilder: ${snapshot.error}"); // ВАЖНО: Логируем ошибку
+                        AsyncSnapshot<QuerySnapshot> createdEventsSnapshot) {
+                      if (createdEventsSnapshot.hasError) {
                         return Center(
-                            child: Text(
-                                'Ошибка загрузки данных: ${snapshot.error}')); // Показываем ошибку на экране
+                            child:
+                                Text('Ошибка загрузки созданных мероприятий'));
                       }
-
-                      if (snapshot.connectionState == ConnectionState.waiting) {
+                      if (createdEventsSnapshot.connectionState ==
+                          ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
-                      // <-  Получаем _ВСЕ_ документы из Firestore:
-                      final allEvents = snapshot.data!.docs;
+                      return StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('events')
+                            .where('attendingUsers',
+                                arrayContains:
+                                    FirebaseAuth.instance.currentUser?.uid)
+                            .snapshots(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot>
+                                attendingEventsSnapshot) {
+                          if (attendingEventsSnapshot.hasError) {
+                            return Center(
+                                child: Text(
+                                    'Ошибка загрузки посещаемых мероприятий'));
+                          }
+                          if (attendingEventsSnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
 
-                      // Отфильтровываем мероприятия по поиску и по дате
-                      final filteredEvents = allEvents.where((event) {
-                        final eventData = event.data() as Map<String, dynamic>;
-                        final title = (eventData['eventName']?.toString() ?? '')
-                            .toLowerCase();
-                        final query = _searchText.toLowerCase();
-                        final eventDate =
-                            eventData['eventDate'] as String? ?? '';
-                        final eventTime =
-                            eventData['eventTime'] as String? ?? '';
+                          // Объединяем результаты
+                          final allEvents = [
+                            ...createdEventsSnapshot.data?.docs ?? [],
+                            ...attendingEventsSnapshot.data?.docs ?? []
+                          ];
 
-                        // Проверяем и поиск, и дату
-                        return title.contains(query) &&
-                            (eventDate.isNotEmpty && eventTime.isNotEmpty
-                                ? isEventPassed(
-                                    eventDate, eventTime) // Проверяем дату
-                                : false); // Если даты нет, не показываем
-                      }).toList();
+                          // Отфильтровываем мероприятия по поиску и по дате
+                          final filteredEvents = allEvents.where((event) {
+                            final eventData =
+                                event.data() as Map<String, dynamic>;
+                            final title =
+                                (eventData['eventName']?.toString() ?? '')
+                                    .toLowerCase();
+                            final query = _searchText.toLowerCase();
+                            final eventDate =
+                                eventData['eventDate'] as String? ?? '';
+                            final eventTime =
+                                eventData['eventTime'] as String? ?? '';
 
-                      if (filteredEvents.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/catcloud.png', // Путь к картинке котика
-                                width: 100,
-                                height: 100,
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Нет мероприятий',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
+                            // Проверяем и поиск, и дату
+                            return title.contains(query) &&
+                                (eventDate.isNotEmpty && eventTime.isNotEmpty
+                                    ? isEventPassed(
+                                        eventDate, eventTime) // Проверяем дату
+                                    : false); // Если даты нет, не показываем
+                          }).toList();
 
-                      return ListView.builder(
-                        itemCount: filteredEvents.length,
-                        itemBuilder: (context, index) {
-                          final document = filteredEvents[index];
-                          final eventName = document['eventName'] as String? ??
-                              'Без названия';
-                          final eventDate = document['eventDate'] as String? ??
-                              'Дата не указана'; // Получаем дату
-                          final documentId = document.id;
-
-                          return ElevatedButton(
-                            // Use ElevatedButton instead of Container
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.all(8.0),
-                              backgroundColor: Colors
-                                  .transparent, // Make button background transparent
-                              shadowColor: Colors.transparent, // Remove shadow
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      EventInfoScreen(documentId: documentId),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                          if (filteredEvents.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    eventName, // Название мероприятия из Firebase
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+                                  Image.asset(
+                                    'assets/catcloud.png', // Путь к картинке котика
+                                    width: 100,
+                                    height: 100,
                                   ),
-                                  Text(
-                                    eventDate, // Дата мероприятия из Firebase
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Нет мероприятий',
+                                    style: TextStyle(fontSize: 16),
                                   ),
                                 ],
                               ),
-                            ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            itemCount: filteredEvents.length,
+                            itemBuilder: (context, index) {
+                              final document = filteredEvents[index];
+                              final eventName =
+                                  document['eventName'] as String? ??
+                                      'Без названия';
+                              final eventDate =
+                                  document['eventDate'] as String? ??
+                                      'Дата не указана'; // Получаем дату
+                              final documentId = document.id;
+
+                              return ElevatedButton(
+                                // Use ElevatedButton instead of Container
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.all(8.0),
+                                  backgroundColor: Colors
+                                      .transparent, // Make button background transparent
+                                  shadowColor:
+                                      Colors.transparent, // Remove shadow
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EventInfoScreen(
+                                          documentId: documentId),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        eventName, // Название мероприятия из Firebase
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        eventDate, // Дата мероприятия из Firebase
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       );

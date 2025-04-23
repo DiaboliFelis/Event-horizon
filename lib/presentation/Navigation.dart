@@ -50,8 +50,9 @@ class Navigation {
             args?['documentId'] as String?; //  Получаем documentId
 
         return MaterialPageRoute(
-          builder: (context) => guestListScreen(
-            documentId: documentId ?? '', //  Используем documentId
+          builder: (context) => GuestsPage(
+            documentId: documentId ?? '',
+            attendingUsers: [], //  Используем documentId
           ),
         );
       case '/profile':

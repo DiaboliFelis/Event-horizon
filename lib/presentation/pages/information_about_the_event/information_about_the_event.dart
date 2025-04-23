@@ -204,10 +204,14 @@ class EventInfoScreen extends StatelessWidget {
                             context,
                             'Список гостей',
                             () => Navigator.pushNamed(
-                              context,
-                              '/guest',
-                              arguments: {'documentId': documentId},
-                              ),
+                                  context,
+                                  '/guest',
+                                  arguments: {
+                                    'documentId':
+                                        documentId, // Убедитесь, что documentId имеет значение
+                                    // 'attendingUsers': successState.attendingUsers,
+                                  },
+                                ),
                             const Color(0xFFD9D9D9),
                             const Size(160, 70)),
                       ],
