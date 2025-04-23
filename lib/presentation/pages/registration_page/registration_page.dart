@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'ForgetPassword_page.dart';
 
 class RegistrationPage extends StatelessWidget {
   @override
@@ -116,7 +117,12 @@ class RegistrationScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ForgetPasswordPage()),
+    );
+  },
                       child: const Text(
                         'Забыли пароль?',
                         style: TextStyle(decoration: TextDecoration.underline),
