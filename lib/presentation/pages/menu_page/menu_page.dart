@@ -209,6 +209,8 @@ class _CustomBodyState extends State<CustomBody> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(17.0),
+      child: SingleChildScrollView(
+      reverse: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -517,6 +519,7 @@ class _CustomBodyState extends State<CustomBody> {
             ],
           ),
         ],
+      ),
       ),
     );
   }
