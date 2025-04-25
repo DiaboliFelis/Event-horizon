@@ -180,98 +180,108 @@ class GuestListScreenState extends State<GuestListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFD0E4F7),
-      appBar: AppBar(
-        centerTitle: true,
+    return WillPopScope(
+      // Оборачиваем Scaffold в WillPopScope
+      onWillPop: () async {
+        // Добавляем onWillPop
+        Navigator.of(context)
+            .pushReplacementNamed('/menu'); // Переходим на /menu
+        return false; // Предотвращаем стандартное поведение "назад"
+      },
+      child: Scaffold(
         backgroundColor: const Color(0xFFD0E4F7),
-        title: SizedBox(
-          width: 200,
-          height: 60,
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100)),
-            color: const Color(0x993C3C43),
-            child: const Padding(
-              padding: EdgeInsets.all(0),
-              child: Center(
-                child: Text('Список гостей',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold)),
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: const Color(0xFFD0E4F7),
+          title: SizedBox(
+            width: 200,
+            height: 60,
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100)),
+              color: const Color(0x993C3C43),
+              child: const Padding(
+                padding: EdgeInsets.all(0),
+                child: Center(
+                  child: Text('Список гостей',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold)),
+                ),
               ),
             ),
           ),
         ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: guests.length,
-                  itemBuilder: (context, index) {
-                    final guestID = guests[index];
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: guests.length,
+                    itemBuilder: (context, index) {
+                      final guestID = guests[index];
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Dismissible(
-                        key: Key(guestID),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 20),
-                          child: const Icon(Icons.delete, color: Colors.white),
-                        ),
-                        onDismissed: (direction) {
-                          _removeGuest(guestID);
-                        },
-                        child: FutureBuilder<String>(
-                          future: _getUserLogin(guestID),
-                          builder: (context, snapshot) {
-                            String login;
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              login = "Загрузка...";
-                            } else if (snapshot.hasError) {
-                              login = "Ошибка загрузки";
-                            } else {
-                              login = snapshot.data ?? "Без логина";
-                            }
-                            return Card(
-                              color: const Color(0xA64F81A3),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 15.0, horizontal: 10),
-                                child: Text(
-                                  login,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            );
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Dismissible(
+                          key: Key(guestID),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child:
+                                const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          onDismissed: (direction) {
+                            _removeGuest(guestID);
                           },
+                          child: FutureBuilder<String>(
+                            future: _getUserLogin(guestID),
+                            builder: (context, snapshot) {
+                              String login;
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                login = "Загрузка...";
+                              } else if (snapshot.hasError) {
+                                login = "Ошибка загрузки";
+                              } else {
+                                login = snapshot.data ?? "Без логина";
+                              }
+                              return Card(
+                                color: const Color(0xA64F81A3),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 15.0, horizontal: 10),
+                                  child: Text(
+                                    login,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0x993C3C43),
-        onPressed: () {
-          // Используем анонимную функцию
-          _showAddGuestDialog(context);
-        },
-        tooltip: 'Добавить гостя',
-        child: const Icon(Icons.person_add_alt_outlined, color: Colors.white),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: const Color(0x993C3C43),
+          onPressed: () {
+            // Используем анонимную функцию
+            _showAddGuestDialog(context);
+          },
+          tooltip: 'Добавить гостя',
+          child: const Icon(Icons.person_add_alt_outlined, color: Colors.white),
+        ),
       ),
     );
   }
