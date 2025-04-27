@@ -56,17 +56,30 @@ class EventCubit extends Cubit<InformationAboutTheEventState> {
         return; //  Прерываем выполнение функции
       }
       // Получаем все мероприятия, созданные текущим пользователем
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('events')
-          .where('userId', isEqualTo: user.uid)
-          .get();
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('events').get();
 
-      // Ищем нужный документ по documentId среди результатов запроса
-      DocumentSnapshot? doc;
+// Filter documents after getting the snapshot
+      List<DocumentSnapshot> filteredDocs = [];
       for (var document in querySnapshot.docs) {
+        final data = document.data() as Map<String, dynamic>;
+        final userId = data['userId'] as String?;
+        final attendingUsers = data['attendingUsers'] as List<dynamic>?;
+
+        final isCreator = userId == user.uid;
+        final isAttending = attendingUsers?.contains(user.uid) == true;
+
+        if (isCreator || isAttending) {
+          filteredDocs.add(document);
+        }
+      }
+
+// Now you iterate on filteredDocs instead of querySnapshot.docs.
+      DocumentSnapshot? doc;
+      for (var document in filteredDocs) {
         if (document.id == documentId) {
           doc = document;
-          break; // Нашли нужный документ, выходим из цикла
+          break; // Found the desired document, exit the loop
         }
       }
 
