@@ -9,6 +9,7 @@ Future<void> CreateUserWithLoginEmailAndPassword({
   required String email,
   required String password,
   required String login,
+  required String name,
   required BuildContext context,
 }) async {
   try {
@@ -25,7 +26,7 @@ Future<void> CreateUserWithLoginEmailAndPassword({
           .set({
         'login': login,
         'email': email,
-        'name': '',
+        'name': name,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,6 +82,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _loginController = TextEditingController();
+  final _nameController = TextEditingController();
 
   @override
   void dispose() {
@@ -88,6 +90,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _loginController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -184,6 +187,21 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _nameController,
+                        cursorHeight: 25,
+                        decoration: InputDecoration(
+                          hintText: 'Имя',
+                          hintStyle: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF212121),
+                              fontWeight: FontWeight.w700),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 30),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -200,12 +218,14 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           final confirmPassword =
                               _confirmPasswordController.text.trim();
                           final login = _loginController.text.trim();
+                          final name = _nameController.text.trim();
 
                           // Проверка на пустые поля
                           if (email.isEmpty ||
                               password.isEmpty ||
                               confirmPassword.isEmpty ||
-                              login.isEmpty) {
+                              login.isEmpty ||
+                              name.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content:
@@ -238,6 +258,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                             email: email,
                             password: password,
                             login: login,
+                            name: name,
                             context: context,
                           );
                         },

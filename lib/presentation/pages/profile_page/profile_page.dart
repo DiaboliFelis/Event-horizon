@@ -76,6 +76,14 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                leading: Icon(Icons.edit),
+                title: Text("Изменить имя"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editName();
+                },
+              ),
+              ListTile(
                 leading: Icon(Icons.photo),
                 title: Text("Изменить фото"),
                 onTap: () {
@@ -112,6 +120,69 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+  }
+
+  Future<void> _editName() async {
+    final TextEditingController nameController =
+        TextEditingController(text: _userName);
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Изменить имя"),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              hintText: "Введите новое имя",
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Отмена"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text("Сохранить"),
+              onPressed: () async {
+                if (nameController.text.trim().isNotEmpty) {
+                  Navigator.of(context).pop();
+                  await _updateUserName(nameController.text.trim());
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _updateUserName(String newName) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'name': newName});
+
+      setState(() {
+        _userName = newName;
+      });
+
+      _showOverlayMessage('Имя успешно изменено!');
+    } catch (e) {
+      _showOverlayMessage('Ошибка при изменении имени: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _pickImageFromGallery() async {
@@ -377,6 +448,27 @@ class _ProfilePageState extends State<ProfilePage> {
                         readOnly: true,
                         decoration: InputDecoration(
                           hintText: _userLogin,
+                          hintStyle: const TextStyle(
+                            color: Color.fromARGB(179, 15, 14, 14),
+                            fontSize: 25,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFF4F81A3),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 50),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          hintText: _userName,
                           hintStyle: const TextStyle(
                             color: Color.fromARGB(179, 15, 14, 14),
                             fontSize: 25,

@@ -79,7 +79,7 @@ class GuestListScreenState extends State<GuestListScreen> {
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
-        return userDoc.data()?['login'] as String? ?? 'Без логина';
+        return userDoc.data()?['name'] as String? ?? 'Без логина';
       } else {
         return 'Пользователь не найден';
       }
@@ -243,6 +243,7 @@ class GuestListScreenState extends State<GuestListScreen> {
                             future: _getUserLogin(guestID),
                             builder: (context, snapshot) {
                               String login;
+                              String name;
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
                                 login = "Загрузка...";
