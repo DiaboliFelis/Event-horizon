@@ -42,14 +42,39 @@ class GuestListScreenState extends State<GuestListScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String currentUserId = '';
   List<String> guests = [];
+bool? _isOrganizer; // Добавляем флаг для хранения статуса организатора
 
   @override
   void initState() {
     super.initState();
     _loadGuestsFromSharedPreferences();
     _getCurrentUserId();
+    _checkOrganizerStatus(); // Добавляем проверку организатора
   }
 
+Future<void> _checkOrganizerStatus() async {
+    try {
+      final eventDoc = await _firestore
+          .collection('events')
+          .doc(widget.documentId)
+          .get();
+          
+      if (eventDoc.exists) {
+        setState(() {
+          _isOrganizer = eventDoc['organizerId'] == _auth.currentUser?.uid;
+        });
+      } else {
+        setState(() {
+          _isOrganizer = false;
+        });
+      }
+    } catch (e) {
+      print('Ошибка при проверке организатора: $e');
+      setState(() {
+        _isOrganizer = false;
+      });
+    }
+  }
   // Загрузка списка гостей из SharedPreferences
   Future<void> _loadGuestsFromSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
@@ -228,7 +253,9 @@ class GuestListScreenState extends State<GuestListScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Dismissible(
                           key: Key(guestID),
-                          direction: DismissDirection.endToStart,
+                          direction: _isOrganizer == true 
+    ? DismissDirection.endToStart // Разрешаем свайп только организатору
+    : DismissDirection.none, // Запрещаем для гостей и пока статус не определен
                           background: Container(
                             color: Colors.red,
                             alignment: Alignment.centerRight,
@@ -274,15 +301,16 @@ class GuestListScreenState extends State<GuestListScreen> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: const Color(0x993C3C43),
-          onPressed: () {
-            // Используем анонимную функцию
-            _showAddGuestDialog(context);
-          },
-          tooltip: 'Добавить гостя',
-          child: const Icon(Icons.person_add_alt_outlined, color: Colors.white),
-        ),
+        floatingActionButton: _isOrganizer == true // Показываем кнопку только организатору
+            ? FloatingActionButton(
+                backgroundColor: const Color(0x993C3C43),
+                onPressed: () {
+                  _showAddGuestDialog(context);
+                },
+                tooltip: 'Добавить гостя',
+                child: const Icon(Icons.person_add_alt_outlined, color: Colors.white),
+              )
+            : null,
       ),
     );
   }

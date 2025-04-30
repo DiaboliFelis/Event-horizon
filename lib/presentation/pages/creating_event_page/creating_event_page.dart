@@ -167,6 +167,9 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
             'eventTime': _eventTimeController.text,
             'eventType': eventTypeToSave,
             'userId': user.uid, //  Сохраняем ID пользователя
+            'organizerId': user.uid, // Добавлено поле организатора
+            'attendingUsers': [user.uid], // Создатель автоматически добавляется как участник
+            'createdAt': FieldValue.serverTimestamp(), // Добавлена метка времени создания
           };
 
           // Сохраняем данные в Firestore
