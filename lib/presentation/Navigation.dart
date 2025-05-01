@@ -40,7 +40,7 @@ class Navigation {
             args?['documentId'] as String?; //  Получаем documentId
 
         return MaterialPageRoute(
-          builder: (context) => foodListScreen(
+          builder: (context) => FoodListScreen(
             documentId: documentId ?? '', //  Используем documentId
           ),
         );

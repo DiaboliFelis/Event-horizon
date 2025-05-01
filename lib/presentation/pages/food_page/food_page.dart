@@ -1,58 +1,74 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class foodListScreen extends StatefulWidget {
-  final String documentId;
+class FoodItem {
+  final String id;
+  final String name;
+  final int yesCount;
+  final int noCount;
 
-  const foodListScreen({Key? key, required this.documentId}) : super(key: key);
-
-  @override
-  foodListScreenState createState() => foodListScreenState();
+  FoodItem({
+    required this.id,
+    required this.name,
+    required this.yesCount,
+    required this.noCount,
+  });
 }
 
-class foodListScreenState extends State<foodListScreen> {
-  List<String> food = [];
+class FoodListScreen extends StatefulWidget {
+  final String documentId;
+
+  const FoodListScreen({Key? key, required this.documentId}) : super(key: key);
+
+  @override
+  FoodListScreenState createState() => FoodListScreenState();
+}
+
+class FoodListScreenState extends State<FoodListScreen> {
+  List<FoodItem> foodItems = [];
 
   @override
   void initState() {
     super.initState();
-    _loadFood(); // Загрузка данных при инициализации виджета
+    _loadFood();
   }
 
   Future<void> _loadFood() async {
-    // 1. Получаем ссылку на коллекцию "food" для конкретного мероприятия
     final foodCollection = FirebaseFirestore.instance
         .collection('events')
         .doc(widget.documentId)
         .collection('food');
 
-    // 2. Получаем все документы из коллекции
     final snapshot = await foodCollection.get();
 
-    // 3. Преобразуем документы в список названий блюд
-    List<String> loadedFood =
-        snapshot.docs.map((doc) => doc['name'] as String).toList();
+    final loaded = snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return FoodItem(
+        id: doc.id,
+        name: data['name'] as String,
+        yesCount: data['yes'] ?? 0,
+        noCount: data['no'] ?? 0,
+      );
+    }).toList();
 
-    // 4. Обновляем состояние виджета
-    setState(() {
-      food = loadedFood;
-    });
+    setState(() => foodItems = loaded);
   }
 
   Future<void> _addFood(String name) async {
-    if (name.isNotEmpty) {
-      // 1. Получаем ссылку на коллекцию "food" для конкретного мероприятия
-      final foodCollection = FirebaseFirestore.instance
-          .collection('events')
-          .doc(widget.documentId)
-          .collection('food');
+    if (name.isEmpty) return;
+    final foodCollection = FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.documentId)
+        .collection('food');
 
-      // 2. Добавляем новое блюдо в коллекцию
-      await foodCollection.add({'name': name});
+    await foodCollection.add({
+      'name': name,
+      'yes': 0,
+      'no': 0,
+      'votes': {},
+    });
 
-      // 3. Обновляем список блюд
-      _loadFood();
-    }
+    _loadFood();
   }
 
   void _showAddFoodDialog() {
@@ -60,56 +76,28 @@ class foodListScreenState extends State<foodListScreen> {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFFD0E4F7),
-          title: SizedBox(
-            width: 300,
-            height: 100,
-            child: Center(
-              child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50)),
-                color: const Color(0x993C3C43),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                  child: Text(
-                    'Добавить блюдо',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFD0E4F7),
+        title: const Text('Добавить блюдо',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Название блюда'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _addFood(controller.text.trim());
+              Navigator.pop(context);
+            },
+            child: const Text('Добавить'),
           ),
-          content: Card(
-            color: const Color(0xA64F81A3),
-            child: TextField(
-              controller: controller,
-              decoration:
-                  const InputDecoration(labelText: 'Введите название блюда'),
-            ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                String foodName = controller.text;
-                _addFood(foodName);
-                Navigator.of(context).pop(); // Закрыть диалог
-              },
-              child: const Text('Добавить'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Закрыть диалог без добавления
-              },
-              child: const Text('Отмена'),
-            ),
-          ],
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -118,68 +106,27 @@ class foodListScreenState extends State<foodListScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFD0E4F7),
       appBar: AppBar(
-        centerTitle: true,
         backgroundColor: const Color(0xFFD0E4F7),
-        title: SizedBox(
-          width: 200,
-          height: 60,
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100)),
-            color: const Color(0x993C3C43),
-            child: const Padding(
-              padding: EdgeInsets.all(0),
-              child: Center(
-                child: Text('Меню',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ),
-        ),
+        centerTitle: true,
+        title: const Text('Меню', style: TextStyle(color: Colors.black)),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: food.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Card(
-                        color: const Color(0xA64F81A3),
-                        child: ListTile(
-                          title: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15.0, horizontal: 10),
-                            child: Text(
-                              food[index],
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(8),
+        itemCount: foodItems.length,
+        itemBuilder: (context, index) {
+          final item = foodItems[index];
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            child: ListTile(
+              title: Text(item.name),
+              subtitle: Text('✅ ${item.yesCount}   ❌ ${item.noCount}'),
+            ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0x993C3C43),
-        onPressed: () => _showAddFoodDialog(),
-        tooltip: 'Добавить блюдо',
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        onPressed: _showAddFoodDialog,
+        child: const Icon(Icons.add),
       ),
     );
   }
