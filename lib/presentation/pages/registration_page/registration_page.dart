@@ -60,6 +60,8 @@ class RegistrationScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFD8ECFF),
       body: Center(
+        child: SingleChildScrollView(
+        reverse: true,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -149,6 +151,7 @@ class RegistrationScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
