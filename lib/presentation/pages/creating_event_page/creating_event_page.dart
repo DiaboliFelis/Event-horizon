@@ -168,8 +168,11 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
             'eventType': eventTypeToSave,
             'userId': user.uid, //  Сохраняем ID пользователя
             'organizerId': user.uid, // Добавлено поле организатора
-            'attendingUsers': [user.uid], // Создатель автоматически добавляется как участник
-            'createdAt': FieldValue.serverTimestamp(), // Добавлена метка времени создания
+            'attendingUsers': [
+              user.uid
+            ], // Создатель автоматически добавляется как участник
+            'createdAt': FieldValue
+                .serverTimestamp(), // Добавлена метка времени создания
           };
 
           // Сохраняем данные в Firestore
@@ -213,9 +216,11 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: buttonColor,
-          foregroundColor: Colors.black,
+          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
           textStyle: const TextStyle(
-              fontSize: 16), //Настройте размер шрифта если нужно
+            fontSize: 16,
+            fontFamily: 'Pacifico',
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -251,13 +256,12 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFFD0E4F7),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         backgroundColor: const Color(0xFFD0E4F7),
         title: const Text('Создание мероприятия'),
       ),
       body: ListView(
-        // Use Stack
         children: [
           Padding(
             padding: const EdgeInsets.all(18.0),
@@ -267,7 +271,6 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // _buildRoundedTitle('Создание мероприятия'),
                     _buildRoundedTextFormField(
                       controller: _eventNameController,
                       hintText: 'Название мероприятия',
@@ -277,22 +280,16 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                         }
                         return null;
                       },
-                      onSaved: (newValue) {
-                        // Сохраняем данные (например, в переменную eventName)
-                        // eventName = newValue; // Если нужно, создайте переменную
-                      },
+                      onSaved: (newValue) {},
                     ),
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
                       controller: _eventDescriptionController,
                       hintText: 'Описание мероприятия',
                       validator: (value) {
-                        // Ваш валидатор для описания
                         return null;
                       },
-                      onSaved: (newValue) {
-                        // eventDescription = newValue;
-                      },
+                      onSaved: (newValue) {},
                     ),
                     const SizedBox(height: 10),
                     _buildRoundedTextFormField(
@@ -300,13 +297,11 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                       hintText: 'Дата мероприятия',
                       readOnly: true,
                       onTap: () {
-                        print('onTap triggered');
                         _selectDate(context);
                       },
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.calendar_today),
                         onPressed: () {
-                          print('IconButton onPressed triggered');
                           _selectDate(context);
                         },
                       ),
@@ -322,11 +317,11 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                     _buildRoundedTextFormField(
                       controller: _eventTimeController,
                       hintText: 'Время мероприятия',
-                      readOnly: true, //  Добавлено
-                      onTap: () => _selectTime(context), //  Изменено
+                      readOnly: true,
+                      onTap: () => _selectTime(context),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.access_time), //  Изменено
-                        onPressed: () => _selectTime(context), //  Изменено
+                        icon: const Icon(Icons.access_time),
+                        onPressed: () => _selectTime(context),
                       ),
                       validator: _validateTime,
                       onSaved: (newValue) {},
@@ -336,78 +331,65 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                       controller: _eventAddressController,
                       hintText: 'Адрес мероприятия',
                       validator: (value) {
-                        // Ваш валидатор для адреса
                         return null;
                       },
-                      onSaved: (newValue) {
-                        // eventAddress = newValue;
-                      },
+                      onSaved: (newValue) {},
                     ),
                     const SizedBox(height: 15),
-
-                    // Ряд кнопок "Меню" и "Список гостей"
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildRoundedButton(
+                          context,
+                          'Меню',
+                          () => Navigator.pushNamed(
                             context,
-                            'Меню',
-                            () => Navigator.pushNamed(
-                                  context,
-                                  '/food',
-                                  arguments: {
-                                    'documentId': tempDocumentId
-                                  }, //  Передаем tempDocumentId
-                                ),
-                            const Color(0xFFD9D9D9),
-                            const Size(160, 60)),
+                            '/food',
+                            arguments: {'documentId': tempDocumentId},
+                          ),
+                          const Color(0xFFD0E4F7),
+                          const Size(160, 60),
+                        ),
                         _buildRoundedButton(
+                          context,
+                          'Вишлист',
+                          () => Navigator.pushNamed(
                             context,
-                            'Вишлист',
-                            () => Navigator.pushNamed(
-                                  context,
-                                  '/wishlist',
-                                  arguments: {
-                                    'documentId': tempDocumentId
-                                  }, //  Передаем tempDocumentId
-                                ),
-                            const Color(0xFFD9D9D9),
-                            const Size(160, 60)),
-                        
+                            '/wishlist',
+                            arguments: {'documentId': tempDocumentId},
+                          ),
+                          const Color(0xFFD0E4F7),
+                          const Size(160, 60),
+                        ),
                       ],
                     ),
-
-                    const SizedBox(height: 15), // Отступ
-
+                    const SizedBox(height: 15),
                     DropdownButtonFormField<String>(
                       value: selectedEventType,
                       decoration: InputDecoration(
-                        labelStyle:
-                            TextStyle(color: Colors.black), // Стиль подписи
-                        hintText: 'Выберите тип', // Подсказка
-                        hintStyle:
-                            TextStyle(color: Colors.black), // Стиль подсказки
+                        labelStyle: const TextStyle(color: Colors.black),
+                        hintText: 'Выберите тип',
+                        hintStyle: const TextStyle(color: Colors.black),
                         border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(50), // Скругленные углы
-                          borderSide: BorderSide(
-                            color: const Color(0xA64F81A3),
-                          ), // Цвет рамки
+                          borderRadius: BorderRadius.circular(50),
+                          borderSide: const BorderSide(
+                            color: Color(0xA64F81A3),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                            // Рамка, когда поле активно
-                            borderRadius: BorderRadius.circular(50),
-                            borderSide: BorderSide(
-                              color: const Color(0xA64F81A3),
-                            )),
+                          borderRadius: BorderRadius.circular(50),
+                          borderSide: const BorderSide(
+                            color: Color(0xA64F81A3),
+                          ),
+                        ),
                         focusedBorder: OutlineInputBorder(
-                            // Рамка, когда поле в фокусе
-                            borderRadius: BorderRadius.circular(50),
-                            borderSide: BorderSide(
-                              color: const Color(0xA64F81A3),
-                            )),
-                        filled: true, // Заливка фона
-                        fillColor: const Color(0xA64F81A3), // Цвет заливки
+                          borderRadius: BorderRadius.circular(50),
+                          borderSide: const BorderSide(
+                            color: Color(0xA64F81A3),
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xA64F81A3),
                       ),
                       items: <String>[
                         'День рождения',
@@ -419,15 +401,15 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                           value: value,
                           child: Text(
                             value,
-                            style: TextStyle(color: Colors.black, fontSize: 16),
+                            style: const TextStyle(
+                                color: Colors.black, fontSize: 16),
                           ),
                         );
                       }).toList(),
                       onChanged: (String? newValue) {
                         setState(() {
                           selectedEventType = newValue;
-                          showTextField = newValue ==
-                              'Другое'; // Показывает текстовое поле, если выбрано "Другое"
+                          showTextField = newValue == 'Другое';
                         });
                       },
                       validator: (value) {
@@ -444,47 +426,18 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                         selectedEventType = newValue;
                       },
                     ),
-                    if (showTextField) // отображает текстовое поле если выбрано "Другое"
+                    if (showTextField)
                       TextFormField(
                         controller: customEventTypeController,
                         decoration: const InputDecoration(
                             labelText: 'Введите тип мероприятия'),
-                        onSaved: (newValue) {
-                          //  Сохраняем значение, введенное в поле "Другое"
-                          //  Например, можно сохранить его в переменную состояния
-                          //  customEventType = newValue;
-                        },
-                      ), // Отступ
+                        onSaved: (newValue) {},
+                      ),
                   ],
                 ),
               ),
             ),
           ),
-          // Кнопка "Вишлист"
-          // Positioned(
-          //   // Position the "Add Wishlist" button
-          //   bottom: 110, // Adjust as needed
-          //   left: 0,
-          //   right: 0,
-          //   child: Align(
-          //     alignment: Alignment.center,
-          //     child: _buildRoundedButton(
-          //       context,
-          //       'Можете добавить вишлист\n         (список желаний)',
-          //       () => Navigator.pushNamed(
-          //         context,
-          //         '/wishlist',
-          //         arguments: {
-          //           'documentId': tempDocumentId
-          //         }, //  Передаем tempDocumentId
-          //       ),
-          //       const Color(0xA64F81A3),
-          //       const Size(280, 75),
-          //     ),
-          //   ),
-          // ),
-
-          // Ряд кнопок "Назад" и "Сохранить"
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -493,12 +446,40 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                 context,
                 'Сохранить',
                 _submitForm,
-                const Color(0xFFD9D9D9),
+                const Color(0xFFD0E4F7),
                 const Size(320, 70),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+// Кнопка с единым стилем
+  Widget _buildStylededButton(BuildContext context, String text,
+      VoidCallback onPressed, Color color, Size size) {
+    return SizedBox(
+      width: size.width,
+      height: size.height,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 15),
+        ),
+        onPressed: onPressed,
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
       ),
     );
   }

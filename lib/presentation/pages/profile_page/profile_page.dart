@@ -443,43 +443,71 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 50),
                     SizedBox(
                       width: 300,
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          hintText: _userLogin,
-                          hintStyle: const TextStyle(
-                            color: Color.fromARGB(179, 15, 14, 14),
-                            fontSize: 25,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Логин',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                          filled: true,
-                          fillColor: const Color(0xFF4F81A3),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide.none,
+                          const SizedBox(height: 8),
+                          TextField(
+                            textAlign: TextAlign.center,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              hintText: _userLogin,
+                              hintStyle: const TextStyle(
+                                color: Color.fromARGB(179, 15, 14, 14),
+                                fontSize: 25,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFF4F81A3),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 50),
+                    const SizedBox(height: 30),
                     SizedBox(
                       width: 300,
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          hintText: _userName,
-                          hintStyle: const TextStyle(
-                            color: Color.fromARGB(179, 15, 14, 14),
-                            fontSize: 25,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Имя пользователя',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                          filled: true,
-                          fillColor: const Color(0xFF4F81A3),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide.none,
+                          const SizedBox(height: 8),
+                          TextField(
+                            textAlign: TextAlign.center,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              hintText: _userName,
+                              hintStyle: const TextStyle(
+                                color: Color.fromARGB(179, 15, 14, 14),
+                                fontSize: 25,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFF4F81A3),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 20),
