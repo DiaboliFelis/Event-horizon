@@ -127,7 +127,7 @@ class EventInfoScreen extends StatelessWidget {
           ),
         ),
       ),
-      backgroundColor: const Color(0xFFD0E4F7),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255), // Белый фон
       body: BlocProvider<EventCubit>(
         create: (context) => EventCubit()..onPageOpened(documentId),
         child: BlocBuilder<EventCubit, InformationAboutTheEventState>(
@@ -198,7 +198,7 @@ class EventInfoScreen extends StatelessWidget {
                                   '/informationFood',
                                   arguments: {'documentId': documentId},
                                 ),
-                            const Color(0xFFD9D9D9),
+                            const Color(0xFFD0E4F7),
                             const Size(160, 70)),
                         _buildRoundedButton(
                             context,
@@ -212,7 +212,7 @@ class EventInfoScreen extends StatelessWidget {
                                     // 'attendingUsers': successState.attendingUsers,
                                   },
                                 ),
-                            const Color(0xFFD9D9D9),
+                            const Color(0xFFD0E4F7),
                             const Size(160, 70)),
                       ],
                     ),
