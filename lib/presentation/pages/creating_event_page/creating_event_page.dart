@@ -149,6 +149,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+     if (tempDocumentId == null) return;
       String eventTypeToSave;
       if (selectedEventType == 'Другое') {
         eventTypeToSave = customEventTypeController.text;
@@ -181,11 +182,12 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
               .doc(tempDocumentId)
               .set(eventData);
 
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Данные сохранены')),
           );
 
-          tempDocumentId = null;
+         
 
           Navigator.pushNamed(
             context,
@@ -197,6 +199,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
             const SnackBar(content: Text('Пользователь не авторизован')),
           );
         }
+         tempDocumentId = null;
       } catch (e) {
         print('Ошибка при сохранении в Firestore: $e');
         ScaffoldMessenger.of(context).showSnackBar(
