@@ -52,28 +52,20 @@ class _InformationWishlistPageState extends State<InformationWishlistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD0E4F7),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color(0xFFD0E4F7),
         title: SizedBox(
-          width: 200,
-          height: 60,
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100)),
-            color: const Color(0x993C3C43),
-            child: const Padding(
-              padding: EdgeInsets.all(0),
-              child: Center(
-                child: Text('Вишлист',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ),
+//            width: 200,
+//            height: 60,
+//           child: Card(
+//             shape: RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(100)),
+//            color: const Color(0x993C3C43),
+//             child: const Padding(
+//               padding: EdgeInsets.all(0),
+          child: Text('Вишлист', style: TextStyle(color: Colors.black)),
         ),
       ),
       body: Center(
@@ -95,14 +87,14 @@ class _InformationWishlistPageState extends State<InformationWishlistPage> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Card(
-                        color: const Color(0xA64F81A3),
+                        color: const Color(0xFFD0E4F7),
                         child: ListTile(
                           title: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 15.0, horizontal: 10),
                             child: Text(
                               wishlist[index],
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                         ),

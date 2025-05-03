@@ -108,12 +108,18 @@ class _InformationFoodPageState extends State<InformationFoodPage> {
   Widget build(BuildContext context) {
     if (_error != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Меню')),
+        appBar: AppBar(
+            backgroundColor: const Color(0xFFD0E4F7),
+            centerTitle: true,
+            title: const Text('Меню')),
         body: Center(child: Text('Ошибка: $_error')),
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Меню')),
+      appBar: AppBar(
+          backgroundColor: const Color(0xFFD0E4F7),
+          centerTitle: true,
+          title: const Text('Меню')),
       body: ListView.builder(
         padding: const EdgeInsets.all(8),
         itemCount: foodDocs.length,
@@ -125,6 +131,7 @@ class _InformationFoodPageState extends State<InformationFoodPage> {
           final no = data['no'] ?? 0;
           final vote = userVotes[id];
           return Card(
+            color: const Color(0xFFD0E4F7),
             margin: const EdgeInsets.symmetric(vertical: 6),
             child: ListTile(
               title: Text(data['name'] ?? ''),

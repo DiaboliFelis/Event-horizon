@@ -65,33 +65,13 @@ class wishlistListScreenState extends State<WishlistListScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: const Color(0xFFD0E4F7),
-          title: SizedBox(
-            width: 300,
-            height: 100,
-            child: Center(
-              child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50)),
-                color: const Color(0x993C3C43),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
-                  child: Text(
-                    'Добавить желание',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
+          title: Text(
+            'Добавить желание',
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          content: Card(
-            color: const Color(0xA64F81A3),
-            child: TextField(
-              controller: controller,
-              decoration: const InputDecoration(labelText: 'Введите желание'),
-            ),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(labelText: 'Введите желание'),
           ),
           actions: [
             TextButton(
@@ -117,28 +97,20 @@ class wishlistListScreenState extends State<WishlistListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD0E4F7),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color(0xFFD0E4F7),
         title: SizedBox(
-          width: 200,
-          height: 60,
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100)),
-            color: const Color(0x993C3C43),
-            child: const Padding(
-              padding: EdgeInsets.all(0),
-              child: Center(
-                child: Text('Вишлист',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ),
+//            width: 200,
+//            height: 60,
+//           child: Card(
+//             shape: RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(100)),
+//            color: const Color(0x993C3C43),
+//             child: const Padding(
+//               padding: EdgeInsets.all(0),
+          child: Text('Вишлист', style: TextStyle(color: Colors.black)),
         ),
       ),
       body: Center(
@@ -153,14 +125,14 @@ class wishlistListScreenState extends State<WishlistListScreen> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Card(
-                        color: const Color(0xA64F81A3),
+                        color: const Color(0xFFD0E4F7),
                         child: ListTile(
                           title: Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 15.0, horizontal: 10),
                             child: Text(
                               wishlist[index],
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                         ),
@@ -174,12 +146,12 @@ class wishlistListScreenState extends State<WishlistListScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0x993C3C43),
+//        backgroundColor: const Color(0x993C3C43),
         onPressed: () => _showAddFoodDialog(),
         tooltip: 'Добавить жедание',
         child: const Icon(
           Icons.add,
-          color: Colors.white,
+//          color: Colors.white,
         ),
       ),
     );

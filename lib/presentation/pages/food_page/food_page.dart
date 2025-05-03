@@ -104,7 +104,7 @@ class FoodListScreenState extends State<FoodListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFD0E4F7),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFFD0E4F7),
         centerTitle: true,
@@ -117,6 +117,7 @@ class FoodListScreenState extends State<FoodListScreen> {
           final item = foodItems[index];
           return Card(
             margin: const EdgeInsets.symmetric(vertical: 6),
+            color: const Color(0xFFD0E4F7),
             child: ListTile(
               title: Text(item.name),
               subtitle: Text('✅ ${item.yesCount}   ❌ ${item.noCount}'),

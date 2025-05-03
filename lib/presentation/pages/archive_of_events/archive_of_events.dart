@@ -103,7 +103,8 @@ class MyEvents extends StatelessWidget {
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('events')
-            .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+            .where('attendingUsers',
+                arrayContains: FirebaseAuth.instance.currentUser?.uid)
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {

@@ -42,7 +42,7 @@ class GuestListScreenState extends State<GuestListScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String currentUserId = '';
   List<String> guests = [];
-bool? _isOrganizer; // Добавляем флаг для хранения статуса организатора
+  bool? _isOrganizer; // Добавляем флаг для хранения статуса организатора
 
   @override
   void initState() {
@@ -52,13 +52,11 @@ bool? _isOrganizer; // Добавляем флаг для хранения ст�
     _checkOrganizerStatus(); // Добавляем проверку организатора
   }
 
-Future<void> _checkOrganizerStatus() async {
+  Future<void> _checkOrganizerStatus() async {
     try {
-      final eventDoc = await _firestore
-          .collection('events')
-          .doc(widget.documentId)
-          .get();
-          
+      final eventDoc =
+          await _firestore.collection('events').doc(widget.documentId).get();
+
       if (eventDoc.exists) {
         setState(() {
           _isOrganizer = eventDoc['organizerId'] == _auth.currentUser?.uid;
@@ -75,6 +73,7 @@ Future<void> _checkOrganizerStatus() async {
       });
     }
   }
+
   // Загрузка списка гостей из SharedPreferences
   Future<void> _loadGuestsFromSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
@@ -214,28 +213,12 @@ Future<void> _checkOrganizerStatus() async {
         return false; // Предотвращаем стандартное поведение "назад"
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFD0E4F7),
+        backgroundColor: Colors.white,
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: const Color(0xFFD0E4F7),
           title: SizedBox(
-            width: 200,
-            height: 60,
-            child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100)),
-              color: const Color(0x993C3C43),
-              child: const Padding(
-                padding: EdgeInsets.all(0),
-                child: Center(
-                  child: Text('Список гостей',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ),
+            child: Text('Список гостей', style: TextStyle(color: Colors.black)),
           ),
         ),
         body: Center(
@@ -253,9 +236,11 @@ Future<void> _checkOrganizerStatus() async {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Dismissible(
                           key: Key(guestID),
-                          direction: _isOrganizer == true 
-    ? DismissDirection.endToStart // Разрешаем свайп только организатору
-    : DismissDirection.none, // Запрещаем для гостей и пока статус не определен
+                          direction: _isOrganizer == true
+                              ? DismissDirection
+                                  .endToStart // Разрешаем свайп только организатору
+                              : DismissDirection
+                                  .none, // Запрещаем для гостей и пока статус не определен
                           background: Container(
                             color: Colors.red,
                             alignment: Alignment.centerRight,
@@ -280,13 +265,16 @@ Future<void> _checkOrganizerStatus() async {
                                 login = snapshot.data ?? "Без логина";
                               }
                               return Card(
-                                color: const Color(0xA64F81A3),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 15.0, horizontal: 10),
-                                  child: Text(
-                                    login,
-                                    style: const TextStyle(color: Colors.white),
+                                color: const Color(0xFFD0E4F7),
+                                child: ListTile(
+                                  title: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 15.0, horizontal: 10),
+                                    child: Text(
+                                      login,
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                    ),
                                   ),
                                 ),
                               );
@@ -301,16 +289,20 @@ Future<void> _checkOrganizerStatus() async {
             ),
           ),
         ),
-        floatingActionButton: _isOrganizer == true // Показываем кнопку только организатору
-            ? FloatingActionButton(
-                backgroundColor: const Color(0x993C3C43),
-                onPressed: () {
-                  _showAddGuestDialog(context);
-                },
-                tooltip: 'Добавить гостя',
-                child: const Icon(Icons.person_add_alt_outlined, color: Colors.white),
-              )
-            : null,
+        floatingActionButton:
+            _isOrganizer == true // Показываем кнопку только организатору
+                ? FloatingActionButton(
+//                    backgroundColor: const Color(0x993C3C43),
+                    onPressed: () {
+                      _showAddGuestDialog(context);
+                    },
+                    tooltip: 'Добавить гостя',
+                    child: const Icon(
+                      Icons.person_add_alt_outlined,
+                      //color: Colors.white
+                    ),
+                  )
+                : null,
       ),
     );
   }
