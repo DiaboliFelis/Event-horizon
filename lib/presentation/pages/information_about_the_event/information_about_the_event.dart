@@ -216,7 +216,7 @@ class EventInfoScreen extends StatelessWidget {
                             'Список гостей',
                             () => Navigator.pushNamed(
                                   context,
-                                  '/guest',
+                                  '/guest1',
                                   arguments: {
                                     'documentId':
                                         documentId, // Убедитесь, что documentId имеет значение

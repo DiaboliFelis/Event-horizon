@@ -13,6 +13,7 @@ import 'package:event_horizon/presentation/pages/registration_page/registration_
 import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
 import 'package:event_horizon/presentation/pages/food_page/information_food_page.dart';
 import 'package:event_horizon/presentation/pages/wishlist_page/information_wishlist_page.dart';
+import 'package:event_horizon/presentation/pages/guests_page/guests_page1.dart';
 
 class Navigation {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -51,6 +52,17 @@ class Navigation {
 
         return MaterialPageRoute(
           builder: (context) => GuestsPage(
+            documentId: documentId ?? '',
+            attendingUsers: [], //  Используем documentId
+          ),
+        );
+      case '/guest1':
+        final args = settings.arguments as Map<String, dynamic>?;
+        final documentId =
+            args?['documentId'] as String?; //  Получаем documentId
+
+        return MaterialPageRoute(
+          builder: (context) => GuestsPage1(
             documentId: documentId ?? '',
             attendingUsers: [], //  Используем documentId
           ),
