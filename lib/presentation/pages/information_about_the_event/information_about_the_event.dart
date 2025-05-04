@@ -17,7 +17,7 @@ class EventInfoScreen extends StatelessWidget {
     final timeFormat = DateFormat('HH:mm'); // Формат времени
 
     // Функция для создания закруглённой кнопки
-    Widget _buildRoundedButton(BuildContext context, String text,
+    Widget _buildRoundedButton(BuildContext context, String buttonText,
         VoidCallback onPressed, Color buttonColor, Size size) {
       return SizedBox(
         width: size.width,
@@ -33,7 +33,18 @@ class EventInfoScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
           ),
-          child: Text(text),
+          child: Center(
+            // Оборачиваем Text в Center
+            child: Text(
+              buttonText,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16, // или другой подходящий размер
+                //fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center, // Добавляем textAlign
+            ),
+          ),
         ),
       );
     }

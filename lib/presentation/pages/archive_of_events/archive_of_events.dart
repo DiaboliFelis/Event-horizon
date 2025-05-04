@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+String userId = FirebaseAuth.instance.currentUser!.uid;
+
 bool isEventPassed(String eventDateString, String eventTimeString) {
   try {
     final dateFormat = DateFormat('dd.MM.yyyy');
@@ -34,6 +36,8 @@ class ArchiveOfEventsPage extends StatelessWidget {
   final String? eventTime;
   const ArchiveOfEventsPage({Key? key, this.eventDate, this.eventTime})
       : super(key: key);
+
+  bool get wantKeepAlive => true;
 
   void _showOptionsDialog(BuildContext context) {
     showDialog(
@@ -103,8 +107,12 @@ class MyEvents extends StatelessWidget {
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('events')
-            .where('attendingUsers',
-                arrayContains: FirebaseAuth.instance.currentUser?.uid)
+            .where(Filter.or(
+              Filter('attendingUsers', arrayContains: userId),
+              Filter('creatorId',
+                  isEqualTo:
+                      userId), // Добавляем условие для созданных пользователем
+            ))
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -126,12 +134,14 @@ class MyEvents extends StatelessWidget {
             final eventDate = eventData['eventDate'] as String? ?? '';
             final eventTime = eventData['eventTime'] as String? ?? '';
 
-            if (eventDate.isNotEmpty && eventTime.isNotEmpty) {
-              return isEventPassed(
-                  eventDate, eventTime); // Показываем только прошедшие
-            }
-            return false; // Игнорируем события без даты и времени
+            return (eventDate.isNotEmpty && eventTime.isNotEmpty
+                ? isEventPassed(eventDate, eventTime) // Проверяем дату
+                : false); // Если даты нет, не показываем
           }).toList();
+
+          if (pastEvents.isEmpty) {
+            return Center(child: Text('Нет прошедших мероприятий.'));
+          }
 
           return ListView.builder(
             itemCount: pastEvents.length,
