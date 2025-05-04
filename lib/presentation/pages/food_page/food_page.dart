@@ -11,24 +11,47 @@ class foodListScreen extends StatefulWidget {
 }
 
 class foodListScreenState extends State<foodListScreen> {
-  final List<String> food = [];
+  List<String> food = [];
 
-  void _addFood(String name) async {
+  @override
+  void initState() {
+    super.initState();
+    _loadFood(); // Загрузка данных при инициализации виджета
+  }
+
+  Future<void> _loadFood() async {
+    // 1. Получаем ссылку на коллекцию "food" для конкретного мероприятия
+    final foodCollection = FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.documentId)
+        .collection('food');
+
+    // 2. Получаем все документы из коллекции
+    final snapshot = await foodCollection.get();
+
+    // 3. Преобразуем документы в список названий блюд
+    List<String> loadedFood =
+        snapshot.docs.map((doc) => doc['name'] as String).toList();
+
+    // 4. Обновляем состояние виджета
+    setState(() {
+      food = loadedFood;
+    });
+  }
+
+  Future<void> _addFood(String name) async {
     if (name.isNotEmpty) {
       // 1. Получаем ссылку на коллекцию "food" для конкретного мероприятия
       final foodCollection = FirebaseFirestore.instance
           .collection('events')
-          .doc(widget
-              .documentId) //  Замени widget.documentId на правильный documentId
+          .doc(widget.documentId)
           .collection('food');
 
       // 2. Добавляем новое блюдо в коллекцию
       await foodCollection.add({'name': name});
 
-      // 3. Обновляем локальное состояние (если нужно)
-      setState(() {
-        food.add(name);
-      });
+      // 3. Обновляем список блюд
+      _loadFood();
     }
   }
 
@@ -72,8 +95,8 @@ class foodListScreenState extends State<foodListScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                String food = controller.text;
-                _addFood(food);
+                String foodName = controller.text;
+                _addFood(foodName);
                 Navigator.of(context).pop(); // Закрыть диалог
               },
               child: const Text('Добавить'),

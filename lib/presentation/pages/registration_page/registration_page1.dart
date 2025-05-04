@@ -9,51 +9,51 @@ Future<void> CreateUserWithLoginEmailAndPassword({
   required String email,
   required String password,
   required String login,
+  required String name,
   required BuildContext context,
 }) async {
   try {
-    // Создание пользователя с email и паролем
     UserCredential userCredential =
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
 
-    // Сохраняем логин и email в Firestore после регистрации
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userCredential.user!.uid)
-        .set({
-      'login': login,
-      'email': email,
-      'name': '', // Имя, которое пользователь может изменить позже
-    });
+    if (userCredential.user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'login': login,
+        'email': email,
+        'name': name,
+      });
 
-    // Уведомление о успешной регистрации
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Пользователь зарегистрирован успешно!')),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Пользователь зарегистрирован успешно!')),
+      );
 
-    // Переход на страницу профиля после регистрации
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => ProfilePage()));
+      if (context.mounted) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => ProfilePage()));
+      }
+    }
   } on FirebaseAuthException catch (e) {
-    // Обработка ошибок регистрации
     String errorMessage = 'Произошла ошибка. Пожалуйста, повторите позднее.';
     if (e.code == 'weak-password') {
       errorMessage = 'Слишком простой пароль.';
     } else if (e.code == 'email-already-in-use') {
       errorMessage = 'Аккаунт с такой почтой уже существует.';
+    } else if (e.code == 'invalid-email') {
+      errorMessage = 'Неверный формат email.';
     }
 
-    // Отображение ошибки пользователю
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(errorMessage)),
     );
   } catch (e) {
-    // Обработка неожиданной ошибки
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Неожиданная ошибка.')),
+      const SnackBar(content: Text('Неожиданная ошибка.')),
     );
   }
 }
@@ -82,6 +82,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _loginController = TextEditingController();
+  final _nameController = TextEditingController();
 
   @override
   void dispose() {
@@ -89,6 +90,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _loginController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -185,6 +187,21 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _nameController,
+                        cursorHeight: 25,
+                        decoration: InputDecoration(
+                          hintText: 'Имя',
+                          hintStyle: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF212121),
+                              fontWeight: FontWeight.w700),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 30),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -201,12 +218,14 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                           final confirmPassword =
                               _confirmPasswordController.text.trim();
                           final login = _loginController.text.trim();
+                          final name = _nameController.text.trim();
 
                           // Проверка на пустые поля
                           if (email.isEmpty ||
                               password.isEmpty ||
                               confirmPassword.isEmpty ||
-                              login.isEmpty) {
+                              login.isEmpty ||
+                              name.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content:
@@ -239,6 +258,7 @@ class _RegistrationScreen1State extends State<RegistrationScreen1> {
                             email: email,
                             password: password,
                             login: login,
+                            name: name,
                             context: context,
                           );
                         },

@@ -183,7 +183,7 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
 
           Navigator.pushNamed(
             context,
-            '/eventInfo',
+            '/guest',
             arguments: {'documentId': documentId},
           );
         } else {
@@ -360,10 +360,17 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
                             const Size(160, 60)),
                         _buildRoundedButton(
                             context,
-                            'Список гостей',
-                            () => Navigator.pushNamed(context, '/guest'),
+                            'Вишлист',
+                            () => Navigator.pushNamed(
+                                  context,
+                                  '/wishlist',
+                                  arguments: {
+                                    'documentId': tempDocumentId
+                                  }, //  Передаем tempDocumentId
+                                ),
                             const Color(0xFFD9D9D9),
                             const Size(160, 60)),
+                        
                       ],
                     ),
 
@@ -451,28 +458,28 @@ class _CreatingAnEventPageState extends State<CreatingAnEventPage> {
             ),
           ),
           // Кнопка "Вишлист"
-          Positioned(
-            // Position the "Add Wishlist" button
-            bottom: 110, // Adjust as needed
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: _buildRoundedButton(
-                context,
-                'Можете добавить вишлист\n         (список желаний)',
-                () => Navigator.pushNamed(
-                  context,
-                  '/wishlist',
-                  arguments: {
-                    'documentId': tempDocumentId
-                  }, //  Передаем tempDocumentId
-                ),
-                const Color(0xA64F81A3),
-                const Size(280, 75),
-              ),
-            ),
-          ),
+          // Positioned(
+          //   // Position the "Add Wishlist" button
+          //   bottom: 110, // Adjust as needed
+          //   left: 0,
+          //   right: 0,
+          //   child: Align(
+          //     alignment: Alignment.center,
+          //     child: _buildRoundedButton(
+          //       context,
+          //       'Можете добавить вишлист\n         (список желаний)',
+          //       () => Navigator.pushNamed(
+          //         context,
+          //         '/wishlist',
+          //         arguments: {
+          //           'documentId': tempDocumentId
+          //         }, //  Передаем tempDocumentId
+          //       ),
+          //       const Color(0xA64F81A3),
+          //       const Size(280, 75),
+          //     ),
+          //   ),
+          // ),
 
           // Ряд кнопок "Назад" и "Сохранить"
           Align(

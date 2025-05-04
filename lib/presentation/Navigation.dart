@@ -1,3 +1,4 @@
+import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event_data.dart';
 import 'package:flutter/material.dart';
 import 'package:event_horizon/presentation/pages/SplashScreen_page/SplashScreen_page.dart';
 import 'package:event_horizon/presentation/pages/menu_page/menu_page.dart';
@@ -13,6 +14,8 @@ import 'package:event_horizon/presentation/pages/registration_page/registration_
 import 'package:event_horizon/presentation/pages/information_about_the_event/information_about_the_event.dart';
 import 'package:event_horizon/presentation/pages/food_page/information_food_page.dart';
 import 'package:event_horizon/presentation/pages/wishlist_page/information_wishlist_page.dart';
+import 'package:event_horizon/presentation/pages/EventsNotifications/EventsNotifications.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Navigation {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -24,6 +27,14 @@ class Navigation {
       case '/create_event':
         return MaterialPageRoute(
             builder: (context) => const CreatingAnEventPage());
+      case '/notifications':
+        return MaterialPageRoute(
+          builder: (context) => BlocProvider(
+              // Оборачиваем EventDetailsScreen в BlocProvider
+              create: (context) => EventCubit(), // Создаем экземпляр EventCubit
+              child: SettingsScreen() // Передаем documentId (или пустую строку)
+              ),
+        );
       case '/wishlist':
         final args = settings.arguments as Map<String, dynamic>?;
         final documentId =
@@ -45,7 +56,17 @@ class Navigation {
           ),
         );
       case '/guest':
-        return MaterialPageRoute(builder: (context) => GuestsPage());
+        final args = settings.arguments as Map<String, dynamic>?;
+        final documentId =
+            args?['documentId'] as String?; //  Получаем documentId
+
+        return MaterialPageRoute(
+          builder: (context) => GuestsPage(
+            documentId: documentId ?? '',
+            attendingUsers: [], //  Используем documentId
+            isEventOwner: args?['isEventOwner'] ?? true,
+          ),
+        );
       case '/profile':
         return MaterialPageRoute(builder: (context) => ProfilePage());
       case '/my_event':
