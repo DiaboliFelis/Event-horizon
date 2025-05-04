@@ -425,7 +425,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Image.asset(
-                                    'assets/account_icon.png',
+                                    'assets/cat_zont.png',
                                     width: 250,
                                     height: 250,
                                     fit: BoxFit.cover,
@@ -433,7 +433,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 },
                               )
                             : Image.asset(
-                                'assets/account_icon.png',
+                                'assets/cat_zont.png',
                                 width: 250,
                                 height: 250,
                                 fit: BoxFit.cover,
