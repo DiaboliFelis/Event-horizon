@@ -85,7 +85,7 @@ class EventInfoScreen extends StatelessWidget {
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromRGBO(29, 143, 219, 0.624),
+          backgroundColor: const Color.fromARGB(159, 26, 156, 243),
           foregroundColor: const Color.fromARGB(255, 255, 255, 255),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
