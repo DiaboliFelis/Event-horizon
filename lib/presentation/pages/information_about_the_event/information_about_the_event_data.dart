@@ -4,25 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-// Состояния загрузки информации о мероприятии
 abstract class InformationAboutTheEventState {
   const InformationAboutTheEventState();
 }
 
-// Состояние загрузки в процессе
 class InfAboutTheEventLoadInProgress extends InformationAboutTheEventState {
   const InfAboutTheEventLoadInProgress();
 }
 
-// Состояние успешной загрузки
 class InfAboutTheEventLoadSuccess extends InformationAboutTheEventState {
   final EventData eventdata;
-  final String? notificationTime;
 
-  const InfAboutTheEventLoadSuccess(this.eventdata, {this.notificationTime});
+  const InfAboutTheEventLoadSuccess(this.eventdata);
 }
 
-// Модель данных о мероприятии
 class EventData {
   final String? eventName;
   final String? eventDescription;
@@ -30,8 +25,6 @@ class EventData {
   final String? eventDate;
   final String? eventTime;
   final String? eventAddress;
-  final bool isEventOwner; // Флаг организатора
-  final bool isGuest; // Флаг гостя
 
   EventData({
     required this.eventName,
@@ -40,69 +33,68 @@ class EventData {
     required this.eventDate,
     required this.eventTime,
     required this.eventAddress,
-    required this.isEventOwner,
-    required this.isGuest,
   });
 }
 
-// Cubit для управления состоянием информации о мероприятии
 class EventCubit extends Cubit<InformationAboutTheEventState> {
   EventCubit() : super(const InfAboutTheEventLoadInProgress());
 
-  // Метод загрузки данных при открытии страницы
   Future<void> onPageOpened(String documentId) async {
-    // Создаем пустые данные по умолчанию
     final emptyData = EventData(
-      eventName: null,
-      eventDescription: null,
-      eventType: null,
-      eventDate: null,
-      eventTime: null,
-      eventAddress: null,
-      isEventOwner: false,
-      isGuest: false,
-    );
-
+        eventName: null,
+        eventDescription: null,
+        eventType: null,
+        eventDate: null,
+        eventTime: null,
+        eventAddress: null);
     try {
-      // Получаем текущего пользователя
-      final user = FirebaseAuth.instance.currentUser;
+      final user =
+          FirebaseAuth.instance.currentUser; //  Получаем текущего пользователя
       if (user == null) {
         // Если пользователь не авторизован, показываем пустые данные
         emit(InfAboutTheEventLoadSuccess(emptyData));
-        return; // Прерываем выполнение функции
+        return; //  Прерываем выполнение функции
+      }
+      // Получаем все мероприятия, созданные текущим пользователем
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('events').get();
+
+// Filter documents after getting the snapshot
+      List<DocumentSnapshot> filteredDocs = [];
+      for (var document in querySnapshot.docs) {
+        final data = document.data() as Map<String, dynamic>;
+        final userId = data['userId'] as String?;
+        final attendingUsers = data['attendingUsers'] as List<dynamic>?;
+
+        final isCreator = userId == user.uid;
+        final isAttending = attendingUsers?.contains(user.uid) == true;
+
+        if (isCreator || isAttending) {
+          filteredDocs.add(document);
+        }
       }
 
-      // Получаем документ мероприятия из Firestore
-      final doc = await FirebaseFirestore.instance
-          .collection('events')
-          .doc(documentId)
-          .get();
+// Now you iterate on filteredDocs instead of querySnapshot.docs.
+      DocumentSnapshot? doc;
+      for (var document in filteredDocs) {
+        if (document.id == documentId) {
+          doc = document;
+          break; // Found the desired document, exit the loop
+        }
+      }
 
-      // Проверяем, существует ли документ
-      if (doc.exists) {
+      //Проверяем, нашли ли мы документ
+      if (doc != null && doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
-
-        // Определяем роль пользователя:
-        // isCreator - true если пользователь создатель мероприятия
-        // isAttending - true если пользователь в списке приглашенных
-        final isCreator = data['userId'] == user.uid;
-        final attendingUsers = data['attendingUsers'] as List? ?? [];
-        final isAttending = attendingUsers.contains(user.uid);
-
-        // Создаем объект с данными о мероприятии
         final eventdata = EventData(
-          eventName: data['eventName'],
-          eventDescription: data['eventDescription'],
-          eventType: data['eventType'],
-          eventDate: data['eventDate'],
-          eventTime: data['eventTime'],
-          eventAddress: data['eventAddress'],
-          isEventOwner: isCreator,
-          isGuest: isAttending &&
-              !isCreator, // Гость - если приглашен, но не создатель
-        );
+            eventName: data['eventName'],
+            eventDescription: data['eventDescription'],
+            eventType: data['eventType'],
+            eventDate: data['eventDate'],
+            eventTime: data['eventTime'],
+            eventAddress: data['eventAddress']);
 
-        // Передаем состояние и данные на страницу
+//Передаём состояние и данные на страницу
         emit(InfAboutTheEventLoadSuccess(eventdata));
       } else {
         print('Документ не найден');
@@ -111,43 +103,6 @@ class EventCubit extends Cubit<InformationAboutTheEventState> {
     } catch (e) {
       print('Ошибка при загрузке данных: $e');
       emit(InfAboutTheEventLoadSuccess(emptyData));
-    }
-  }
-
-  // Метод сохранения общих настроек уведомлений
-  Future<void> saveNotificationPreference(String notificationTime) async {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
-
-    try {
-      await FirebaseFirestore.instance
-          .collection('user_settings')
-          .doc(userId) //  Используем userId как documentId
-          .set({
-        'notificationTime': notificationTime,
-      });
-      print('Общие настройки уведомления сохранены');
-    } catch (e) {
-      print('Ошибка при сохранении настроек уведомления: $e');
-    }
-  }
-
-  // Метод для получения общих настроек уведомлений
-  Future<String?> getNotificationPreference() async {
-    //  Удален параметр eventId
-    final userId = FirebaseAuth.instance.currentUser!.uid;
-
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('user_settings')
-          .doc(userId) //  Используем userId как documentId
-          .get();
-      if (doc.exists) {
-        return doc.data()?['notificationTime'] as String?;
-      }
-      return null; //  Если настроек нет
-    } catch (e) {
-      print('Ошибка при получении настроек уведомления: $e');
-      return null; //  Обработка ошибок
     }
   }
 }

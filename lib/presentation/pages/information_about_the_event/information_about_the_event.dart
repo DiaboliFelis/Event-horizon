@@ -17,7 +17,7 @@ class EventInfoScreen extends StatelessWidget {
     final timeFormat = DateFormat('HH:mm'); // Формат времени
 
     // Функция для создания закруглённой кнопки
-    Widget _buildRoundedButton(BuildContext context, String text,
+    Widget _buildRoundedButton(BuildContext context, String buttonText,
         VoidCallback onPressed, Color buttonColor, Size size) {
       return SizedBox(
         width: size.width,
@@ -33,7 +33,18 @@ class EventInfoScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
           ),
-          child: Text(text),
+          child: Center(
+            // Оборачиваем Text в Center
+            child: Text(
+              buttonText,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16, // или другой подходящий размер
+                //fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center, // Добавляем textAlign
+            ),
+          ),
         ),
       );
     }
@@ -85,7 +96,7 @@ class EventInfoScreen extends StatelessWidget {
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromRGBO(29, 143, 219, 0.624),
+          backgroundColor: const Color.fromARGB(159, 26, 156, 243),
           foregroundColor: const Color.fromARGB(255, 255, 255, 255),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
@@ -127,7 +138,7 @@ class EventInfoScreen extends StatelessWidget {
           ),
         ),
       ),
-      backgroundColor: const Color(0xFFD0E4F7),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255), // Белый фон
       body: BlocProvider<EventCubit>(
         create: (context) => EventCubit()..onPageOpened(documentId),
         child: BlocBuilder<EventCubit, InformationAboutTheEventState>(
@@ -198,21 +209,21 @@ class EventInfoScreen extends StatelessWidget {
                                   '/informationFood',
                                   arguments: {'documentId': documentId},
                                 ),
-                            const Color(0xFFD9D9D9),
+                            const Color(0xFFD0E4F7),
                             const Size(160, 70)),
                         _buildRoundedButton(
                             context,
                             'Список гостей',
                             () => Navigator.pushNamed(
                                   context,
-                                  '/guest',
+                                  '/guest1',
                                   arguments: {
                                     'documentId':
                                         documentId, // Убедитесь, что documentId имеет значение
                                     // 'attendingUsers': successState.attendingUsers,
                                   },
                                 ),
-                            const Color(0xFFD9D9D9),
+                            const Color(0xFFD0E4F7),
                             const Size(160, 70)),
                       ],
                     ),

@@ -1,19 +1,22 @@
+//Список гостей
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Страница со списком гостей мероприятия (обертка для StatefulWidget)
 class GuestsPage extends StatelessWidget {
-  final String documentId; // ID мероприятия в Firestore
-  final List<String> attendingUsers; // Список ID приглашенных пользователей
-  final bool isEventOwner; // Флаг, указывающий является ли текущий пользователь организатором
+  final String documentId;
+  final List<String> attendingUsers;
 
   const GuestsPage({
     Key? key,
     required this.documentId,
     required this.attendingUsers,
-    required this.isEventOwner,
   }) : super(key: key);
 
   @override
@@ -21,22 +24,70 @@ class GuestsPage extends StatelessWidget {
     return GuestListScreen(
       documentId: documentId,
       initialAttendingUsers: attendingUsers,
-      isEventOwner: isEventOwner,
     );
   }
 }
 
-/// Основной экран со списком гостей
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> _initializeNotifications() async {
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings(
+          '@mipmap/ic_launcher'); // Убедитесь, что у вас есть иконка
+
+  const InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+}
+
+// Метод для показа простого уведомления
+Future<void> _sendNotificationToGuest(String fcmToken) async {
+  final response = await http.post(
+    Uri.parse('hhttp://127.0.0.1:5000/send_notification'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'token': fcmToken}),
+  );
+
+  if (response.statusCode == 200) {
+    print('Уведомление успешно отправлено');
+  } else {
+    print('Ошибка при отправке уведомления');
+  }
+}
+
+Future<void> saveFcmToken(String userId, String fcmToken) async {
+  await FirebaseFirestore.instance.collection('users').doc(userId).set({
+    'fcmToken': fcmToken,
+  }, SetOptions(merge: true));
+}
+
+Future<String?> _getFcmTokenForUser(String guestId) async {
+//  try {
+  DocumentSnapshot doc =
+      await FirebaseFirestore.instance.collection('users').doc(guestId).get();
+
+  //   if (doc.exists) {
+  //     return doc.data()?['fcmToken'] as String?;
+  //   } else {
+  //     print("Пользователь с ID $guestId не найден.");
+  //     return null;
+  //   }
+  // } catch (e) {
+  //   print("Ошибка при получении FCM токена: $e");
+  //   return null;
+  // }
+}
+
 class GuestListScreen extends StatefulWidget {
   final String documentId;
   final List<String> initialAttendingUsers;
-  final bool isEventOwner;
 
   const GuestListScreen({
     Key? key,
     required this.documentId,
     required this.initialAttendingUsers,
-    required this.isEventOwner,
   }) : super(key: key);
 
   @override
@@ -46,33 +97,55 @@ class GuestListScreen extends StatefulWidget {
 class GuestListScreenState extends State<GuestListScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  String currentUserId = ''; // ID текущего пользователя
-  List<String> guests = []; // Список ID гостей мероприятия
+  String currentUserId = '';
+  List<String> guests = [];
+  bool? _isOrganizer; // Добавляем флаг для хранения статуса организатора
 
   @override
   void initState() {
     super.initState();
-    _loadGuestsFromSharedPreferences(); // Загружаем гостей из локального хранилища
-    _getCurrentUserId(); // Получаем ID текущего пользователя
+    _loadGuestsFromSharedPreferences();
+    _getCurrentUserId();
+    _checkOrganizerStatus(); // Добавляем проверку организатора
   }
 
-  /// Загрузка списка гостей из SharedPreferences
+  Future<void> _checkOrganizerStatus() async {
+    try {
+      final eventDoc =
+          await _firestore.collection('events').doc(widget.documentId).get();
+
+      if (eventDoc.exists) {
+        setState(() {
+          _isOrganizer = eventDoc['organizerId'] == _auth.currentUser?.uid;
+        });
+      } else {
+        setState(() {
+          _isOrganizer = false;
+        });
+      }
+    } catch (e) {
+      print('Ошибка при проверке организатора: $e');
+      setState(() {
+        _isOrganizer = false;
+      });
+    }
+  }
+
+  // Загрузка списка гостей из SharedPreferences
   Future<void> _loadGuestsFromSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      // Используем сохраненный список или начальный список из параметров
-      guests = prefs.getStringList('guests_${widget.documentId}') ?? 
-              widget.initialAttendingUsers;
+      guests = prefs.getStringList('guests_${widget.documentId}') ??
+          widget.initialAttendingUsers;
     });
   }
 
-  /// Сохранение списка гостей в SharedPreferences
+  // Сохранение списка гостей в SharedPreferences
   Future<void> _saveGuestsToSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('guests_${widget.documentId}', guests);
   }
 
-  /// Получение ID текущего пользователя
   void _getCurrentUserId() {
     final user = _auth.currentUser;
     if (user != null) {
@@ -82,25 +155,24 @@ class GuestListScreenState extends State<GuestListScreen> {
     }
   }
 
-  /// Получение логина пользователя по его ID
+  // Получение логина пользователя по ID
   Future<String> _getUserLogin(String userId) async {
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
         return userDoc.data()?['name'] as String? ?? 'Без логина';
+      } else {
+        return 'Пользователь не найден';
       }
-      return 'Пользователь не найден';
     } catch (e) {
       return 'Ошибка загрузки';
     }
   }
 
-  /// Добавление гостя по логину
   Future<void> _addGuestByLogin(String login) async {
     if (login.isEmpty) return;
 
     try {
-      // Ищем пользователя по логину
       final query = await _firestore
           .collection('users')
           .where('login', isEqualTo: login)
@@ -113,7 +185,6 @@ class GuestListScreenState extends State<GuestListScreen> {
 
       final guestUserId = query.docs.first.id;
 
-      // Проверки перед добавлением
       if (guestUserId == currentUserId) {
         _showErrorDialog('Нельзя добавить самого себя');
         return;
@@ -124,7 +195,7 @@ class GuestListScreenState extends State<GuestListScreen> {
         return;
       }
 
-      // Добавляем в подколлекцию мероприятия
+      // Добавляем пользователя в подколлекцию мероприятия
       await _firestore
           .collection('events')
           .doc(widget.documentId)
@@ -132,28 +203,24 @@ class GuestListScreenState extends State<GuestListScreen> {
           .doc(guestUserId)
           .set({'addedAt': FieldValue.serverTimestamp()});
 
-      // Обновляем основной список гостей
+      print('Добавляем гостя в мероприятие с ID: ${widget.documentId}');
+
       await _firestore.collection('events').doc(widget.documentId).update({
         'attendingUsers': FieldValue.arrayUnion([guestUserId]),
       });
 
-      // Обновляем локальное состояние
       setState(() {
         guests.add(guestUserId);
       });
 
-      // Сохраняем изменения локально
       await _saveGuestsToSharedPreferences();
     } catch (e) {
       _showErrorDialog('Ошибка при добавлении гостя: ${e.toString()}');
     }
   }
 
-  /// Удаление гостя из мероприятия
   Future<void> _removeGuest(String userId) async {
-    if (!widget.isEventOwner) return; // Только организатор может удалять
-
-    // Удаляем из подколлекции
+    // Удаляем пользователя из подколлекции мероприятия
     await _firestore
         .collection('events')
         .doc(widget.documentId)
@@ -161,21 +228,17 @@ class GuestListScreenState extends State<GuestListScreen> {
         .doc(userId)
         .delete();
 
-    // Обновляем основной список
     await _firestore.collection('events').doc(widget.documentId).update({
       'attendingUsers': FieldValue.arrayRemove([userId]),
     });
 
-    // Обновляем локальное состояние
     setState(() {
       guests.remove(userId);
     });
 
-    // Сохраняем изменения локально
     await _saveGuestsToSharedPreferences();
   }
 
-  /// Показ диалога с ошибкой
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -186,7 +249,9 @@ class GuestListScreenState extends State<GuestListScreen> {
           actions: [
             TextButton(
               child: const Text('OK'),
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
           ],
         );
@@ -197,38 +262,29 @@ class GuestListScreenState extends State<GuestListScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      // Обработка нажатия кнопки "назад"
+      // Оборачиваем Scaffold в WillPopScope
       onWillPop: () async {
-        Navigator.of(context).pushReplacementNamed('/menu');
-        return false;
+        for (String guestId in guests) {
+          String? fcmToken = await _getFcmTokenForUser(guestId);
+          if (fcmToken != null) {
+            await _sendNotificationToGuest(fcmToken);
+          } else {
+            print("Не удалось получить FCM токен для пользователя $guestId");
+          }
+        }
+
+        // Добавляем onWillPop
+        Navigator.of(context)
+            .pushReplacementNamed('/menu'); // Переходим на /menu
+        return false; // Предотвращаем стандартное поведение "назад"
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFD0E4F7),
+        backgroundColor: Colors.white,
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: const Color(0xFFD0E4F7),
           title: SizedBox(
-            width: 200,
-            height: 60,
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100),
-              ),
-              color: const Color(0x993C3C43),
-              child: const Padding(
-                padding: EdgeInsets.all(0),
-                child: Center(
-                  child: Text(
-                    'Список гостей',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            child: Text('Список гостей', style: TextStyle(color: Colors.black)),
           ),
         ),
         body: Center(
@@ -241,23 +297,22 @@ class GuestListScreenState extends State<GuestListScreen> {
                     itemCount: guests.length,
                     itemBuilder: (context, index) {
                       final guestID = guests[index];
+
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Dismissible(
                           key: Key(guestID),
-                          // Разрешаем свайп только для организатора
-                          direction: widget.isEventOwner
-                              ? DismissDirection.endToStart
-                              : DismissDirection.none,
-                          // Подтверждение удаления (только для организатора)
-                          confirmDismiss: (_) async {
-                            return widget.isEventOwner;
-                          },
+                          direction: _isOrganizer == true
+                              ? DismissDirection
+                                  .endToStart // Разрешаем свайп только организатору
+                              : DismissDirection
+                                  .none, // Запрещаем для гостей и пока статус не определен
                           background: Container(
                             color: Colors.red,
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.only(right: 20),
-                            child: const Icon(Icons.delete, color: Colors.white),
+                            child:
+                                const Icon(Icons.delete, color: Colors.white),
                           ),
                           onDismissed: (direction) {
                             _removeGuest(guestID);
@@ -265,20 +320,27 @@ class GuestListScreenState extends State<GuestListScreen> {
                           child: FutureBuilder<String>(
                             future: _getUserLogin(guestID),
                             builder: (context, snapshot) {
-                              String login = snapshot.connectionState ==
-                                      ConnectionState.waiting
-                                  ? "Загрузка..."
-                                  : snapshot.hasError
-                                      ? "Ошибка загрузки"
-                                      : snapshot.data ?? "Без логина";
+                              String login;
+                              String name;
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                login = "Загрузка...";
+                              } else if (snapshot.hasError) {
+                                login = "Ошибка загрузки";
+                              } else {
+                                login = snapshot.data ?? "Без логина";
+                              }
                               return Card(
-                                color: const Color(0xA64F81A3),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 15.0, horizontal: 10),
-                                  child: Text(
-                                    login,
-                                    style: const TextStyle(color: Colors.white),
+                                color: const Color(0xFFD0E4F7),
+                                child: ListTile(
+                                  title: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 15.0, horizontal: 10),
+                                    child: Text(
+                                      login,
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                    ),
                                   ),
                                 ),
                               );
@@ -293,20 +355,25 @@ class GuestListScreenState extends State<GuestListScreen> {
             ),
           ),
         ),
-        // Кнопка добавления гостя (только для организатора)
-        floatingActionButton: widget.isEventOwner
-            ? FloatingActionButton(
-                backgroundColor: const Color(0x993C3C43),
-                onPressed: () => _showAddGuestDialog(context),
-                tooltip: 'Добавить гостя',
-                child: const Icon(Icons.person_add_alt_outlined, color: Colors.white),
-              )
-            : null,
+        floatingActionButton:
+            _isOrganizer == true // Показываем кнопку только организатору
+                ? FloatingActionButton(
+//                    backgroundColor: const Color(0x993C3C43),
+                    onPressed: () {
+                      _showAddGuestDialog(context);
+                    },
+                    tooltip: 'Добавить гостя',
+                    child: const Icon(
+                      Icons.person_add_alt_outlined,
+                      //color: Colors.white
+                    ),
+                  )
+                : null,
       ),
     );
   }
 
-  /// Диалоговое окно для добавления нового гостя
+  // Диалоговое окно для добавления пользователя по логину
   Future<void> _showAddGuestDialog(BuildContext context) async {
     String login = '';
 
@@ -317,11 +384,15 @@ class GuestListScreenState extends State<GuestListScreen> {
           title: const Text('Добавить пользователя по логину'),
           content: TextField(
             decoration: const InputDecoration(hintText: 'Введите логин'),
-            onChanged: (value) => login = value,
+            onChanged: (value) {
+              login = value;
+            },
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+              },
               child: const Text('Отмена'),
             ),
             TextButton(

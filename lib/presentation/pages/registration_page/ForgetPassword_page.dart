@@ -20,43 +20,46 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   }
 
   Future<void> _resetPassword() async {
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  final email = _emailController.text.trim();
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => const Center(child: CircularProgressIndicator()),
-  );
-
-  try {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-    Navigator.pop(context); // Закрываем индикатор
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Ссылка отправлена на $email'),
-        duration: const Duration(seconds: 5),
-      ),
+    final email = _emailController.text.trim();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
-    Navigator.pop(context); // Закрываем экран восстановления
-  } on FirebaseAuthException catch (e) {
-    Navigator.pop(context); // Закрываем индикатор
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Ошибка: ${_getErrorMessage(e.code)}'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}
 
-String _getErrorMessage(String code) {
-  switch (code) {
-    case 'user-not-found': return 'Пользователь не найден';
-    case 'invalid-email': return 'Некорректный email';
-    default: return 'Ошибка сервера';
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      Navigator.pop(context); // Закрываем индикатор
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ссылка отправлена на $email'),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+      Navigator.pop(context); // Закрываем экран восстановления
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context); // Закрываем индикатор
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка: ${_getErrorMessage(e.code)}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
-}
+
+  String _getErrorMessage(String code) {
+    switch (code) {
+      case 'user-not-found':
+        return 'Пользователь не найден';
+      case 'invalid-email':
+        return 'Некорректный email';
+      default:
+        return 'Ошибка сервера';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,14 +85,18 @@ String _getErrorMessage(String code) {
               children: [
                 const Text(
                   'Введите ваш email',
-                  style: TextStyle(fontSize: 20, color: Colors.white,fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _emailController,
-                      decoration: InputDecoration(
-                        hintText: 'Email',
-                      ),
+                  decoration: const InputDecoration(
+                    hintText: 'Email',
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Введите email';
@@ -101,12 +108,28 @@ String _getErrorMessage(String code) {
                   },
                 ),
                 const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: _resetPassword,
-                  child: const Text('Отправить'),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black54,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: _resetPassword,
+                    child: const Text(
+                      'Отправить',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color.fromARGB(240, 0, 0, 0),
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 20),
-               
               ],
             ),
           ),

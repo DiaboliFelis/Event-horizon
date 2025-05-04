@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class InformationFoodPage extends StatefulWidget {
   final String documentId;
@@ -12,8 +13,10 @@ class InformationFoodPage extends StatefulWidget {
 }
 
 class _InformationFoodPageState extends State<InformationFoodPage> {
-  List<String> food = [];
-  String? _errorMessage;
+  final String userId = FirebaseAuth.instance.currentUser?.uid ?? 'testUser';
+  List<DocumentSnapshot> foodDocs = [];
+  Map<String, String> userVotes = {};
+  String? _error;
 
   @override
   void initState() {
@@ -23,96 +26,148 @@ class _InformationFoodPageState extends State<InformationFoodPage> {
 
   Future<void> _loadFood() async {
     try {
-      // 1. Получаем ссылку на коллекцию "food" для конкретного мероприятия
-      final foodCollection = FirebaseFirestore.instance
+      final snapshot = await FirebaseFirestore.instance
           .collection('events')
           .doc(widget.documentId)
-          .collection('food');
+          .collection('food')
+          .get();
 
-      // 2. Получаем все документы из этой коллекции
-      final snapshot = await foodCollection.get();
+      Map<String, String> votes = {};
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['votes'] != null && data['votes'][userId] != null) {
+          votes[doc.id] = data['votes'][userId];
+        }
+      }
 
-      // 3. Преобразуем документы в список названий блюд
-      List<String> loadedFood =
-          snapshot.docs.map((doc) => doc['name'] as String).toList();
-
-      // 4. Обновляем состояние виджета
       setState(() {
-        food = loadedFood;
-        _errorMessage = null;
+        foodDocs = snapshot.docs;
+        userVotes = votes;
+        _error = null;
       });
     } catch (e) {
-      print('Error loading food: $e');
-      _errorMessage = 'Ошибка при загрузке блюд: $e';
-      setState(() {});
+      setState(() => _error = e.toString());
     }
+  }
+
+  Future<void> _vote(String foodId, String choice) async {
+    final ref = FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.documentId)
+        .collection('food')
+        .doc(foodId);
+
+    final snap = await ref.get();
+    final data = snap.data() as Map<String, dynamic>?;
+    if (data == null) return;
+
+    final prevVote = data['votes']?[userId];
+
+    if (prevVote == choice) return; // уже проголосовал этим же выбором
+
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    if (prevVote != null) {
+      batch.update(ref, {
+        prevVote: FieldValue.increment(-1),
+        'votes.$userId': FieldValue.delete(),
+      });
+    }
+
+    batch.update(ref, {
+      choice: FieldValue.increment(1),
+      'votes.$userId': choice,
+    });
+
+    await batch.commit();
+    _loadFood();
+  }
+
+  Future<void> _cancelVote(String foodId) async {
+    final ref = FirebaseFirestore.instance
+        .collection('events')
+        .doc(widget.documentId)
+        .collection('food')
+        .doc(foodId);
+
+    final snap = await ref.get();
+    final data = snap.data() as Map<String, dynamic>?;
+    if (data == null) return;
+
+    final prevVote = data['votes']?[userId];
+    if (prevVote == null) return; // нет голоса для отмены
+
+    await ref.update({
+      prevVote: FieldValue.increment(-1),
+      'votes.$userId': FieldValue.delete(),
+    });
+    _loadFood();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(
+            backgroundColor: const Color(0xFFD0E4F7),
+            centerTitle: true,
+            title: const Text('Меню')),
+        body: Center(child: Text('Ошибка: $_error')),
+      );
+    }
     return Scaffold(
-      backgroundColor: const Color(0xFFD0E4F7),
       appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: const Color(0xFFD0E4F7),
-        title: SizedBox(
-          width: 200,
-          height: 60,
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100)),
-            color: const Color(0x993C3C43),
-            child: const Padding(
-              padding: EdgeInsets.all(0),
-              child: Center(
-                child: Text('Меню',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold)),
+          backgroundColor: const Color(0xFFD0E4F7),
+          centerTitle: true,
+          title: const Text('Меню')),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(8),
+        itemCount: foodDocs.length,
+        itemBuilder: (context, i) {
+          final doc = foodDocs[i];
+          final data = doc.data() as Map<String, dynamic>;
+          final id = doc.id;
+          final yes = data['yes'] ?? 0;
+          final no = data['no'] ?? 0;
+          final vote = userVotes[id];
+          return Card(
+            color: const Color(0xFFD0E4F7),
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            child: ListTile(
+              title: Text(data['name'] ?? ''),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('✅ $yes   ❌ $no'),
+                  if (vote != null)
+                    TextButton(
+                      onPressed: () => _cancelVote(id),
+                      child: const Text('Отменить голос'),
+                    ),
+                ],
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.check,
+                      color: vote == 'yes' ? Colors.green : null,
+                    ),
+                    onPressed: () => _vote(id, 'yes'),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: vote == 'no' ? Colors.red : null,
+                    ),
+                    onPressed: () => _vote(id, 'no'),
+                  ),
+                ],
               ),
             ),
-          ),
-        ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              // 5. Отображаем сообщение об ошибке, если оно есть
-              if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(_errorMessage!),
-                ),
-              // 6. Отображаем список блюд
-              Expanded(
-                child: ListView.builder(
-                  itemCount: food.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Card(
-                        color: const Color(0xA64F81A3),
-                        child: ListTile(
-                          title: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15.0, horizontal: 10),
-                            child: Text(
-                              food[index],
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
